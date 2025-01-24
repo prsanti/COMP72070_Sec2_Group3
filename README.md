@@ -1,13 +1,20 @@
 # Set up
-## Python version: 3.10.9
+## Python version: 3.13.1
+(I think any Python >= 3.8 or <= 3.13.1)
 
 ### Setup Virtual Environment
 python -m venv env
 ### Activate the venv before running
+#### MacOS
 source env/bin/activate
+#### Windows
+.\env\Scripts\activate
 
 ### Install requirements
 pip install -r requirements.txt
+
+### Run the application
+python main.py
 
 #### Uninstall
 pip uninstall -r requirements.txt -y
