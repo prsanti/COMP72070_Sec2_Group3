@@ -13,8 +13,11 @@ from nicegui.events import ValueChangeEventArguments
 
 # print(os.getcwd())
 
+import utils
+
 # import TCP module from connection package
 from connection import TCP
+
 
 # UI boiler plate
 def show(event: ValueChangeEventArguments):
