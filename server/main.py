@@ -5,9 +5,18 @@
 
 # ui.run()
 
+# directory library
+# import os
+
 from nicegui import ui
 from nicegui.events import ValueChangeEventArguments
 
+# print(os.getcwd())
+
+# import TCP module from connection package
+from connection import TCP
+
+# UI boiler plate
 def show(event: ValueChangeEventArguments):
     name = type(event.sender).__name__
     ui.notify(f'{name}: {event.value}')
@@ -23,3 +32,6 @@ with ui.row():
 ui.link('And many more...', '/documentation').classes('mt-8')
 
 ui.run()
+
+# run TCP connection
+TCP()
