@@ -1,10 +1,3 @@
-# from nicegui import ui
-
-# ui.label('Hello World!')
-# ui.button("Button")
-
-# ui.run()
-
 # directory library
 # import os
 
@@ -13,6 +6,7 @@ from nicegui.events import ValueChangeEventArguments
 
 # print(os.getcwd())
 
+# import utils for helper functions
 import utils
 
 # import TCP module from connection package
@@ -34,7 +28,16 @@ with ui.row():
     ui.select(['One', 'Two'], value='One', on_change=show)
 ui.link('And many more...', '/documentation').classes('mt-8')
 
+ui.label('Server State')
+with ui.column():
+    ui.button('Start Server', on_click=lambda: ui.notify('Server On'))
+    ui.button('Stop Server', on_click=lambda: ui.notify('Server Off'))
+
 ui.run()
 
 # run TCP connection
-TCP()
+server = TCP()
+
+server.bind()
+
+# TCP.listen
