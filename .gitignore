@@ -3,6 +3,7 @@
 
 # Virtual Env
 ./server/env/
+./client_project/env/
 
 # VS Code
 .DS_Store
