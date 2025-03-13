@@ -9,9 +9,13 @@ class TicTacToe(ttk.Frame):
         super().__init__(parent)
         self.parent = parent
         self.main_menu_callback = main_menu_callback
+        self.mode = mode                       #game modes to choose from, vs computer, or vs online player
         self.current_player = "X"
         self.board = [""] * 9
         self.create_widgets()
+
+        if self.mode == "computer" and self.current_player == "O":
+            self.parent.after(500, computerMove)
 
     def create_widgets(self):
         self.grid_frame = ttk.Frame(self)
