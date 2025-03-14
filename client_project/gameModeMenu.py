@@ -23,8 +23,23 @@ class gameModeMenu(ttk.Frame):
         onlineButton = ttk.Button(self, text = "Against Online Player", command = lambda:self.start_game_callback("online"))
         onlineButton.pack(pady = 10)
 
-        ###
-        #back button
-        #backButton = ttk.Button(self, text = "Back to Main Menu", command = self.main_menu_callback)
-        #backButton.pack(pady = 20)
+        ### logout
+        logoutButton = ttk.Button(self, text = "Logout", command = self.main_menu_callback)
+        logoutButton.pack(pady = 30)
 
+if __name__ == "__main__":
+    def dummy_main_menu_callback():
+        print("Back to Main Menu clicked")
+
+    def dummy_start_game_callback(mode):
+        print(f"Start game clicked with mode: {mode}")
+
+    menu = tk.Tk()
+    menu.title("")
+    menu.geometry("400x300")
+
+    # Instantiate gameModeMenu with dummy callbacks
+    menu = gameModeMenu(menu, dummy_main_menu_callback, dummy_start_game_callback)
+    menu.pack(expand=True, fill="both")
+
+    menu.mainloop()
