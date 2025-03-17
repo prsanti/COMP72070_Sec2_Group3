@@ -2,6 +2,12 @@ import tkinter as tk
 from tkinter import ttk, messagebox
 from PIL import ImageTk, Image
 import random
+import socket
+# import TCP module from connection package
+from connection import TCP
+from connection import Packet
+HOST = "127.0.0.1"
+PORT = 27000
 
 # ------------------ Tic-Tac-Toe Game ------------------
 class TicTacToe(ttk.Frame):
@@ -169,5 +175,28 @@ class MainApplication(tk.Tk):
         game_instance.pack(expand=True, fill="both")
 
 if __name__ == "__main__":
-    app = MainApplication()
-    app.mainloop()
+    # app = MainApplication()
+    # app.mainloop()
+
+    # Create a socket and connect to the server
+    client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    client_socket.connect((HOST, PORT))
+    print("Connected to server.")
+
+    # Receive a packet from the server
+    data = client_socket.recv(4096)  # Receive up to 4KB
+    received_packet = Packet.deserialize(data)
+    print(f"Received from Server: {received_packet.__dict__}")
+
+    # Create and send a response Packet
+    response_packet = Packet()
+    response_packet.client = "Client"
+    response_packet.command = "ACK"  # Acknowledging the server message
+
+    # Serialize and send the packet
+    client_socket.sendall(response_packet.serialize())
+    print(f"Sent to Server: {response_packet.__dict__}")
+
+    # Close the socket
+    client_socket.close()
+    print("Connection closed.")
