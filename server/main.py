@@ -9,6 +9,9 @@ from nicegui.events import ValueChangeEventArguments
 # import utils for helper functions
 import utils
 
+from database import test
+
+
 # import TCP module from connection package
 from connection import TCP
 
@@ -33,6 +36,7 @@ with ui.column():
     ui.button('Start Server', on_click=lambda: ui.notify('Server On'))
     ui.button('Stop Server', on_click=lambda: ui.notify('Server Off'))
 
+test.test()
 ui.run()
 
 # run TCP connection
