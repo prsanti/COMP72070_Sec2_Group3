@@ -1,12 +1,12 @@
 import tkinter as tk
-from client_project.login import LoginPage
-from client_project.game_selection import GameSelection
+from login import LoginPage
+from game_selection import GameSelection
 
 class MainApplication(tk.Tk):
     def __init__(self):
         super().__init__()
         self.title("Game Suite")
-        self.geometry("800x600")
+        self.geometry("800x600")  # Set a fixed window size
         self.configure(bg="#2E3440")
         self.show_login_page()
 

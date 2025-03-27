@@ -1,3 +1,4 @@
+import tkinter as tk
 from tkinter import ttk, messagebox
 import random
 
@@ -28,6 +29,10 @@ class WordleGame(ttk.Frame):
                 lbl.grid(row=row, column=col, padx=2, pady=2)
                 row_labels.append(lbl)
             self.letter_labels.append(row_labels)
+
+        # Position the "Main Menu" button below the grid
+        back_btn = ttk.Button(self, text="Main Menu", command=self.main_menu_callback)
+        back_btn.pack(pady=20)
 
         # Bind keyboard events
         self.parent.bind("<Key>", self.handle_keypress)

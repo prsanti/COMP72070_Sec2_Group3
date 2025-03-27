@@ -1,6 +1,5 @@
 import tkinter as tk
 from tkinter import ttk, messagebox
-from PIL import ImageTk, Image
 
 class TicTacToe(ttk.Frame):
     def __init__(self, parent, tcp_client, main_menu_callback):
@@ -11,24 +10,27 @@ class TicTacToe(ttk.Frame):
         self.current_player = "X"
         self.board = [""] * 9
 
-        # Load background image
-        self.bg_image = ImageTk.PhotoImage(Image.open("assets/tacToe.jpg").resize((400, 400)))
+        # Define custom styles for the buttons
+        self.style = ttk.Style()
+        self.style.configure("Blue.TButton", background="lightblue", font=("Arial", 16, "bold"))
+        self.style.configure("Red.TButton", background="lightcoral", font=("Arial", 16, "bold"))
+        self.style.configure("Grid.TButton", background="white", font=("Arial", 16, "bold"))
 
         self.create_widgets()
 
     def create_widgets(self):
-        # Create a canvas for the background image
-        self.canvas = tk.Canvas(self, width=400, height=400)
-        self.canvas.pack()
-        self.canvas.create_image(0, 0, anchor="nw", image=self.bg_image)
+        # Create a frame for the grid
+        self.grid_frame = ttk.Frame(self)
+        self.grid_frame.pack(expand=True, pady=20)
 
         # Create buttons for the Tic-Tac-Toe grid
         self.buttons = []
         for i in range(9):
-            btn = ttk.Button(self, text="", width=8, command=lambda idx=i: self.make_move(idx))
-            btn.place(x=(i % 3) * 130 + 20, y=(i // 3) * 130 + 20)  # Position buttons on the canvas
+            btn = ttk.Button(self.grid_frame, text="", width=8, style="Grid.TButton", command=lambda idx=i: self.make_move(idx))
+            btn.grid(row=i // 3, column=i % 3, padx=5, pady=5)
             self.buttons.append(btn)
 
+        # Position the "Main Menu" button below the grid
         back_btn = ttk.Button(self, text="Main Menu", command=self.main_menu_callback)
         back_btn.pack(pady=20)
 

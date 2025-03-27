@@ -1,8 +1,8 @@
 import tkinter as tk
 from tkinter import ttk
-from ticTacToe import TicTacToe  # Direct import
-from wordleGame import WordleGame  # Direct import
-from coinFlip import CoinFlip  # Direct import
+from ticTacToe import TicTacToe
+from wordleGame import WordleGame
+from coinFlip import CoinFlip
 
 class GameSelection(tk.Frame):
     def __init__(self, parent, tcp_client):
