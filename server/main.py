@@ -44,7 +44,27 @@ from connection import Packet
 #                     print(f"Processed Packet from {received_packet.client}")
 
 
-ui.run()
+if __name__ == '__main__':
+  ui.run(reload=False)
+  server = TCP()
+  # server.bind()
+  # server.listen()
+
+  # # get client socket and address
+  # client_socket, addr = server.accept_client()
+
+  # if client_socket:
+  #     # Create and send a Packet
+  #     packet = Packet()
+  #     packet.client = "Server"
+  #     packet.command = "INIT"
+  #     server.send_packet(client_socket, packet)
+
+  #     # Receive a Packet from the client
+  #     received_packet = server.receive_packet(client_socket)
+  #     if received_packet:
+  #         print(f"Processed Packet from {received_packet.client}")
+
 
 # run TCP connection
 # server = TCP()
