@@ -48,7 +48,7 @@ def createCursor(connection):
 def closeCursor(cursor):
     cursor.close()
 
-def VerifyTableExists(cursor, table: str):
+def verifyTableExists(cursor, table: str):
     listOfTables = cursor.execute(
   f"""SELECT tableName FROM sqlite_master WHERE type='table'
   AND tableName='{table}'; """).fetchall()

@@ -38,10 +38,11 @@ class LoginPage(tk.Frame):
 
         self.tcp_client.connect()
         if self.tcp_client.connected:
-            login_packet = Packet(self.tcp_client.client_id, Type.LOGIN, Category.STATE, "login", {"username": username, "password": password})
+            login_packet = Packet(self.tcp_client.client_id, Type.LOGIN, Category.STATE, f"{username} {password}")
             self.tcp_client.send_packet(login_packet)
             response = self.tcp_client.receive_packet()
-            if response and response.command == "login_success":
+
+            if (response.command == "True" | "1"):
                 self.on_login_success(self.tcp_client)
             else:
                 messagebox.showerror("Error", "Login failed")

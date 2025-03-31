@@ -7,7 +7,7 @@ import time
 
 # import TCP module from connection package
 import socket
-from connection import TCP
+
 from connection import Packet
 HOST = "127.0.0.1"
 PORT = 27000
@@ -38,7 +38,7 @@ def handle_socket_connection():
         s.connect((HOST, PORT))
         while True:
             try:
-                # Attempt to receive data from the server, but without blocking.
+                
                 buffer = s.recv(BUFSIZE)
                 if buffer:
                     packet = Packet.deserialize(buffer)
@@ -49,9 +49,9 @@ def handle_socket_connection():
 
 if __name__ == "__main__":
     # Create a socket and connect to the server
-    socket_thread = threading.Thread(target=handle_socket_connection)
-    socket_thread.daemon = True  
-    socket_thread.start()
+    # socket_thread = threading.Thread(target=handle_socket_connection)
+    #socket_thread.daemon = True  
+    # socket_thread.start()
 
     app = MainApplication()
     app.mainloop() 

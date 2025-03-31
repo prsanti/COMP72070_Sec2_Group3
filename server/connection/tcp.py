@@ -1,6 +1,7 @@
 import socket
 import pickle
 from .packet import Packet
+from .types import State
 
 HOST = "127.0.0.1"
 PORT = 27000
@@ -13,6 +14,7 @@ class TCP:
         self.server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.server_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         self.clients = []
+        self.state: State = State.WAITINGFORCONNECTION
 
     def bind(self):
         """Bind the server to the host and port."""
