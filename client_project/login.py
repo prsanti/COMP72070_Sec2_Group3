@@ -12,7 +12,7 @@ class LoginPage(tk.Frame):
         self.create_widgets()
 
     def create_widgets(self):
-        self.username_label = tk.Label(self, text="Username:")
+        self.username_label = tk.Label(self, text="Email or Username:")
         self.username_label.pack(pady=5)
         self.username_entry = tk.Entry(self)
         self.username_entry.pack(pady=5)
