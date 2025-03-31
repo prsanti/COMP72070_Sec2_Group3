@@ -15,7 +15,7 @@ class WordleGame(ttk.Frame):
         self.create_widgets()
 
     def create_widgets(self):
-        title = ttk.Label(self, text="WORDLE", font=("Arial", 24, "bold"))
+        title = ttk.Label(self, text="WORDLE", font=("Arial", 24, "bold",))
         title.pack(pady=20)
 
         self.grid_frame = ttk.Frame(self)
