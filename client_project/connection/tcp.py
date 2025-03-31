@@ -28,20 +28,14 @@ class TCP:
         print(f"Listening for connections on port {self.port}...")
 
     def accept_client(self):
-        """Accept a new client connection with a timeout."""
-        self.server_socket.settimeout(60)  # Set timeout inside the function
-
+        """Accept a new client connection."""
         try:
             client_socket, addr = self.server_socket.accept()
             self.clients.append(client_socket)
             print(f"Connection established with {addr}")
             return client_socket, addr
-        except socket.timeout:
-            print("Timeout reached: No client connected.")
-            return None, None 
         except socket.error as e:
             print(f"Error accepting client: {e}")
-            return None, None
 
     def send_packet(self, client_socket, packet):
         """Send a Packet object to the connected client."""
@@ -66,10 +60,6 @@ class TCP:
                 client_socket.close()
         except socket.error as e:
             print(f"Error receiving packet: {e}")
-
-        except socket.error as e:
-          print(f"Error receiving packet: {e}")
-
 
     def close(self):
         """Close all client connections and the server socket."""

@@ -18,3 +18,11 @@ class Category(Enum):
   LOSE = 6
   DRAW = 7
   
+class State(Enum):
+
+  WAITINGFORCONNECTION = 1
+  CONNECTED = 2
+  GAME = 3
+  WAITINGFORPLAYER2 = 4
+  CLIENT1 = 5
+  CLIENT2 = 6
