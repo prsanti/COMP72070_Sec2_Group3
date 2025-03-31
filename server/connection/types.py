@@ -17,6 +17,8 @@ class Category(Enum):
   WIN = 5
   LOSE = 6
   DRAW = 7
+  LOGIN = 8
+  SIGNUP = 9
   
 class State(Enum):
 

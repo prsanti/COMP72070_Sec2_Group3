@@ -1,4 +1,4 @@
-from database import verifyTableExists, Connection
+from .database import verifyTableExists
 import sqlite3
 import bcrypt
 
@@ -79,6 +79,7 @@ def createUserTable(cursor: sqlite3.Cursor):
 def addUserToTable(cursor: sqlite3.Cursor, user: User):
 
     # create table if it does
+
     if not verifyTableExists(cursor, "users"):
         createUserTable(cursor)
 
