@@ -1,11 +1,17 @@
 from nicegui import ui
+from database import wordle
+from database import database
 
 # hard coded data for visuals
 # connect to db and populate data
+connection = database.connectOrMakeNewDB()
+cursor = database.createCursor(connection)
 connected_clients = ["Client 1 - User1 - Playing tictactoe", "Client 2 - User2 - Playing tictactoe"]
 chat_logs = ["User1: hiii", "User2: Hello", "User1: glhf<3"]
 database_info = {"User1": "Admin", "User2": "Player"}
-wordle_list = ["Apple", "Badly", "Cache", "Dread"]
+wordle.createWordleTable(cursor)
+wordle_list = wordle.getAllWords(cursor)
+#wordle_list = ["Apple", "Badly", "Cache", "Dread"]
 game_scores = ["Tic Tac Toe | User | Moves | Result", "Wordle | User | Guess | Result"]
 
 def send_message(value):
@@ -43,24 +49,37 @@ with ui.row().style("width: 100%; height: 100%; gap: 20px;"):
         with ui.card().style("width: 100%;"):
             ui.label("Current state: In game")
 
-        # with ui.card().style("width: 100%;"):
-        #     ui.label("Add stuff to database:")
-        #     ui.input(placeholder="Enter data...")
-
         with ui.card().style("width: 100%;"):
             ui.label("Game score:")
             for score in game_scores:
                 ui.label(score)
 
     with ui.column().style("flex: 1;"):
-      with ui.card().style("width: 100%;"):
-          ui.label("Database Information:")
-          for user, role in database_info.items():
-              ui.label(f"{user} - {role}")
-          
-          ui.label("Wordle list:")
-          for word in wordle_list:
-              ui.label(word)
+        with ui.card().style("width: 100%;"):
+            ui.label("Database Information:")
+            for user, role in database_info.items():
+                ui.label(f"{user} - {role}")
+
+        with ui.card().style("width: 100%;"):
+            ui.label("Word list:")
+                
+            # Wrap the two scroll areas inside a ui.row()
+            with ui.row().style("flex: 1; justify-content: space-between;"):
+
+                with ui.scroll_area().classes('w-20 h-32 border'):
+                    for i in range(100):
+                        word = wordle_list[i]
+                        ui.label(word).style("word-wrap: break-word; padding-bottom: 5px;")
+
+                with ui.scroll_area().classes('w-20 h-32 border'):
+                    for i in range(100):
+                        word = wordle_list[i + 100]
+                        ui.label(word).style("word-wrap: break-word; padding-bottom: 5px;")
+                
+                with ui.scroll_area().classes('w-20 h-32 border'):
+                    for i in range(100):
+                        word = wordle_list[i + 200]
+                        ui.label(word).style("word-wrap: break-word; padding-bottom: 5px;")
 
     with ui.column().style("flex: 1;"):
         with ui.card().style("width: 100%;"):
@@ -69,8 +88,8 @@ with ui.row().style("width: 100%; height: 100%; gap: 20px;"):
             for log in chat_logs:
                 ui.label(log)
             with ui.row().style("flex: 1"):
-              ui.input(placeholder="Send message to all users:", on_change=lambda e: send_message(e.value))
-              ui.button("Send", on_click=lambda i=i: send_message(i.value))
+                ui.input(placeholder="Send message to all users:", on_change=lambda e: send_message(e.value))
+                ui.button("Send", on_click=lambda i=i: send_message(i.value))
 
         with ui.card().style("width: 100%;"):
             ui.label("All Chat History")
@@ -78,3 +97,4 @@ with ui.row().style("width: 100%; height: 100%; gap: 20px;"):
             ui.label("User2 | Hello | 03/05/2025 | 12:43")
             ui.label("User1 | glhf<3 | 03/05/2025 | 12:44")
             ui.label("User3 | u suck | 02/02/2025 | 4:56")
+

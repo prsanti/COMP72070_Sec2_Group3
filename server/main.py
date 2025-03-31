@@ -17,7 +17,7 @@ import utils
 # from gui import server_state
 # from gui import clients
 from gui import server_ui
-
+from nicegui import ui
 # import TCP module from connection package
 from connection import TCP
 from connection import Packet
@@ -69,10 +69,14 @@ if __name__ == '__main__':
   #         print(f"Processed Packet from {received_packet.client}")
 
 
+if __name__ == '__main__':
+  # run ui
+  ui.run(reload=False)
+
 # run TCP connection
-# server = TCP()
-# server.bind()
-# server.listen()
+server = TCP()
+server.bind()
+server.listen()
 
 # client_socket, addr = server.accept_client()
 # if client_socket:
