@@ -41,7 +41,7 @@ def verifyLogin(cursor: sqlite3.Cursor, username: str, password):
     hashedPassword = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
 
     # query to select login info from database
-    getUserFromDB = """select Email, username, password from Users where (Email like ?) or (UserName like ?) """
+    getUserFromDB = """SELECT Email, username, password FROM Users WHERE (Email LIKE ?) OR (UserName LIKE ?) """
     cursor.execute(getUserFromDB, username, username)
     user = cursor.fetchone()
 
@@ -63,15 +63,15 @@ def disableUserAdmin(user: User):
 def createUserTable(cursor: sqlite3.Cursor):
 
     # drop user table if it exists
-    cursor.execute("drop table if exists users")
+    cursor.execute("DROP TABLE IF EXISTS users")
  
     # Creating table
-    userTable = f""" create table users (
-               UserID integer primary key
-               Email varchar(255) not null unique,
-             UserName varchar(25) not null unique,
-             Password varchar(25) not null,
-             IsAdmin integer
+    userTable = f""" CREATE TABLE users (
+               UserID INTEGER PRIMARY KEY
+               Email VARCHAR(255) NOT NULL UNIQUE,
+             UserName VARCHAR(25) NOT NULL UNIQUE,
+             Password VARCHAR(25) NOT NULL,
+             IsAdmin INTEGER
           ); """
  
     cursor.execute(userTable)

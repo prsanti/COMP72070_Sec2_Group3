@@ -15,13 +15,10 @@ import utils
 # from gui import server_state
 # from gui import clients
 from gui import server_ui
-
+from nicegui import ui
 # import TCP module from connection package
 from connection import TCP
 
-# run TCP connection
-server = TCP()
-
-server.bind()
-
-# TCP.listen
+if __name__ == '__main__':
+  # run ui
+  ui.run(reload=False)
