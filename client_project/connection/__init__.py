@@ -1,6 +1,6 @@
-# import tcp class from file
-from .tcp import TCP
+
+from .client_tcp import TCPClient
 from .packet import Packet
+from .types import Type, Category
 
-
-print("This will be used for TCP connection")
+print("Client connection package initialized")
