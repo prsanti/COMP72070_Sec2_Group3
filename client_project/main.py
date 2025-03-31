@@ -3,6 +3,13 @@ from tkinter import ttk, messagebox
 from PIL import ImageTk, Image
 import random
 
+# import TCP module from connection package
+import socket
+from connection import TCP
+from connection import Packet
+HOST = "127.0.0.1"
+PORT = 27000
+
 # ------------------ Tic-Tac-Toe Game ------------------
 class TicTacToe(ttk.Frame):
     def __init__(self, parent, main_menu_callback):
@@ -169,5 +176,10 @@ class MainApplication(tk.Tk):
         game_instance.pack(expand=True, fill="both")
 
 if __name__ == "__main__":
+    # Create a socket and connect to the server
+    client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    client_socket.connect((HOST, PORT))
+    print("Connected to server.")
+
     app = MainApplication()
     app.mainloop()

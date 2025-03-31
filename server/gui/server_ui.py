@@ -78,5 +78,3 @@ with ui.row().style("width: 100%; height: 100%; gap: 20px;"):
             ui.label("User2 | Hello | 03/05/2025 | 12:43")
             ui.label("User1 | glhf<3 | 03/05/2025 | 12:44")
             ui.label("User3 | u suck | 02/02/2025 | 4:56")
-
-ui.run()
