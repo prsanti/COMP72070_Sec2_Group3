@@ -2,7 +2,7 @@ import pickle
 from .types import Type, Category
 
 class Packet:
-  def __init__(self):
+  def __init__(self, client="", type=None, category=None, command=""):
     print("Packet constructor")
     self.client = ""
     self.type = Type

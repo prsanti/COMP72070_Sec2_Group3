@@ -1,6 +1,5 @@
 import sqlite3
 import random
-from database import cursor
 
 def createWordleTable(cursor: sqlite3.Cursor):
 
