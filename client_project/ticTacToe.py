@@ -1,20 +1,25 @@
 import tkinter as tk
 from tkinter import ttk, messagebox
-from PIL import ImageTk, Image
-import random
 
-# This is just a small function to run the tic tac toe game
 class TicTacToe(ttk.Frame):
+<<<<<<< HEAD
     def __init__(self, parent, main_menu_callback, is_multiplayer=False, tcp_client=None):
+=======
+    def __init__(self, parent, tcp_client, main_menu_callback):
+>>>>>>> ef559b23a91e935d11e6aea73b27cfca5edecb35
         super().__init__(parent)
         self.parent = parent
+        self.tcp_client = tcp_client
         self.main_menu_callback = main_menu_callback
         self.is_multiplayer = is_multiplayer
         self.tcp_client = tcp_client
         self.current_player = "X"
         self.board = [""] * 9
+<<<<<<< HEAD
         self.player_symbol = "X"  # Will be assigned by server in multiplayer
         self.game_id = None
+=======
+>>>>>>> ef559b23a91e935d11e6aea73b27cfca5edecb35
 
         # Define custom styles for the buttons
         self.style = ttk.Style()
@@ -22,6 +27,7 @@ class TicTacToe(ttk.Frame):
         self.style.configure("Red.TButton", background="lightcoral", font=("Arial", 16, "bold"))
         self.style.configure("Grid.TButton", background="white", font=("Arial", 16, "bold"))
 
+<<<<<<< HEAD
         # Add mode indicator
         mode_text = "Multiplayer Mode" if is_multiplayer else "Single Player Mode"
         mode_label = ttk.Label(self, text=mode_text, font=("Arial", 12))
@@ -48,11 +54,28 @@ class TicTacToe(ttk.Frame):
         for i in range(9):
             btn = ttk.Button(self.grid_frame, text="", width=8, style="Grid.TButton", 
                            command=lambda idx=i: self.make_move(idx))
+=======
+        self.create_widgets()
+
+    def create_widgets(self):
+        # Create a frame for the grid
+        self.grid_frame = ttk.Frame(self)
+        self.grid_frame.pack(expand=True, pady=20)
+
+        # Create buttons for the Tic-Tac-Toe grid
+        self.buttons = []
+        for i in range(9):
+            btn = ttk.Button(self.grid_frame, text="", width=8, style="Grid.TButton", command=lambda idx=i: self.make_move(idx))
+>>>>>>> ef559b23a91e935d11e6aea73b27cfca5edecb35
             btn.grid(row=i // 3, column=i % 3, padx=5, pady=5)
             self.buttons.append(btn)
 
         # Position the "Main Menu" button below the grid
+<<<<<<< HEAD
         back_btn = ttk.Button(self, text="Back to Main Menu", command=self.return_to_menu)
+=======
+        back_btn = ttk.Button(self, text="Main Menu", command=self.main_menu_callback)
+>>>>>>> ef559b23a91e935d11e6aea73b27cfca5edecb35
         back_btn.pack(pady=20)
 
     def make_move(self, idx):
@@ -62,6 +85,7 @@ class TicTacToe(ttk.Frame):
             else:
                 self.single_player_move(idx)
 
+<<<<<<< HEAD
     def multiplayer_move(self, idx):
         if not self.board[idx] and self.current_player == self.player_symbol:
             if self.tcp_client:
@@ -81,6 +105,14 @@ class TicTacToe(ttk.Frame):
             self.board[idx] = "X"
             self.buttons[idx].config(text="X", style="Blue.TButton")
             
+=======
+            # Set background color based on the current player
+            if self.current_player == "X":
+                self.buttons[idx].config(style="Blue.TButton")
+            else:
+                self.buttons[idx].config(style="Red.TButton")
+
+>>>>>>> ef559b23a91e935d11e6aea73b27cfca5edecb35
             if self.check_winner():
                 messagebox.showinfo("Game Over", "You win!")
                 self.reset_game()

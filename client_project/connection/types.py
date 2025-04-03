@@ -1,13 +1,22 @@
-from enum import Enum, auto
+from enum import Enum
 
 class Type(Enum):
-    AUTH = auto()
-    GAME = auto()
-    ERROR = auto()
+  STATE = 1
+  GAME = 2
+  LOGIN = 3
+  REGISTER = 4
+  CHAT = 5
+  ADMIN = 6
+  IMG = 7
 
 class Category(Enum):
-    LOGIN = auto()
-    REGISTER = auto()
-    MOVE = auto()
-    START = auto()
-    END = auto() 
+  STATE = 1
+  TICTACTOE = 2
+  WORDLE = 3
+  RPS = 4
+  WIN = 5
+  LOSE = 6
+  DRAW = 7
+  LOGIN = 8
+  SIGNUP = 9
+  
