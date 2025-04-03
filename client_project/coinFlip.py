@@ -3,7 +3,7 @@ from PIL import ImageTk, Image
 import random
 
 class CoinFlip(ttk.Frame):
-    def __init__(self, parent, tcp_client, main_menu_callback):
+    def __init__(self, parent, main_menu_callback, tcp_client=None):
         super().__init__(parent)
         self.parent = parent
         self.tcp_client = tcp_client
