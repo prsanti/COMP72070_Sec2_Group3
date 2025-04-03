@@ -1,16 +1,15 @@
-from ..connection.packet import Packet
-import users
+from connection.packet import Packet
 import sqlite3
 
 def createPacketTable(cursor: sqlite3.Cursor):
     cursor.execute("""DROP TABLE IF EXISTS packets""")
 
     packetTable = """CREATE TABLE packets(
-    packetID integer primary key,
-    client varchar(255),
-    type integer not null,
-    category integer not null,
-    command varchar )"""
+    packetID INTEGER PRIMARY KEY,
+    client VARCHAR(255),
+    type INTEGER NOT NULL,
+    category INTEGER NOT NULL,
+    command VARCHAR(255) )"""
 
     cursor.execute(packetTable)
 
