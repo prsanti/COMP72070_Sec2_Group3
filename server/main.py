@@ -61,6 +61,7 @@ def serverON(server: TCP):
             elif (received_packet.type == Type.LOGIN and received_packet.category == Category.SIGNUP):
                 # move into function in requests.py
                 loginInfo: str = received_packet.command.split()
+                
                 username: str = loginInfo[0]
                 password: str = loginInfo[1]
 

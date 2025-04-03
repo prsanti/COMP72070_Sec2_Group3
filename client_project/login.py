@@ -29,6 +29,7 @@ class LoginPage(tk.Frame):
         self.offline_button.pack(pady=10)
 
     def login(self):
+        from main import connection_queue
         username = self.username_entry.get()
         password = self.password_entry.get()
 
@@ -36,20 +37,16 @@ class LoginPage(tk.Frame):
             messagebox.showerror("Error", "Please enter both username and password")
             return
 
-        self.tcp_client.connect()
-        if self.tcp_client.connected:
-            login_packet = Packet(self.tcp_client.client_id, Type.LOGIN, Category.STATE, f"{username} {password}")
-            self.tcp_client.send_packet(login_packet)
-            response = self.tcp_client.receive_packet()
+        login_packet = Packet(self.tcp_client.client_id, Type.LOGIN, Category.STATE, f"{username} {password}")
+        connection_queue.put(login_packet)
+        print("Login packet added to the queue") 
 
-            if (response.command == "True" | "1"):
-                self.on_login_success(self.tcp_client)
-            else:
-                messagebox.showerror("Error", "Login failed")
-                self.tcp_client.close()
-        else:
-            messagebox.showwarning("Connection Failed", "Unable to connect to server. Continuing in offline mode.")
-            self.continue_offline()
+        # if (response.command == "True" | "1"):
+        #     self.on_login_success(self.tcp_client)
+        # else:
+        #     messagebox.showerror("Error", "Login failed")
+        #     self.tcp_client.close()
+
 
     def continue_offline(self):
         self.tcp_client.close()

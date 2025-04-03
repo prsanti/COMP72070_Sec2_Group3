@@ -1,20 +1,17 @@
 import tkinter as tk
 from tkinter import ttk, messagebox
-from PIL import ImageTk, Image
-import random
+from connection.tcp import TCP
 import threading
 import time
+import queue
 
 # import TCP module from connection package
 import socket
-<<<<<<< HEAD
-
-=======
->>>>>>> 23346269ca36fd03b0931f55e91cf414ce5ad720
 from connection import Packet
 HOST = "127.0.0.1"
 PORT = 27000
 BUFSIZE = 255
+connection_queue = queue.Queue()
 
 from login import LoginPage
 from game_selection import GameSelection
@@ -39,22 +36,29 @@ class MainApplication(tk.Tk):
 def handle_socket_connection():
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
         s.connect((HOST, PORT))
+        client: TCP = TCP()
         while True:
+            if (not connection_queue.empty()):
+                packet: Packet = connection_queue.get()
+                print(f"Sending packet: {packet}") 
+                client.send_packet(s, packet=packet)
+                
             try:
                 
-                buffer = s.recv(BUFSIZE)
+                buffer = client.receive_packet(s)
                 if buffer:
-                    packet = Packet.deserialize(buffer)
-                    print(f"Received packet from server: {packet.client}, Command: {packet.command}")
-                time.sleep(0.1)  # Sleep for a short time to prevent busy-waiting.
+                    print(f"Received packet from server: {buffer.client}, Command: {buffer.command}")
+                time.sleep(0.05)  # Sleep for a short time to prevent busy-waiting.
             except BlockingIOError:
                 pass  # Ignore BlockingIOError and continue looping.
+            
 
 if __name__ == "__main__":
     # Create a socket and connect to the server
-    # socket_thread = threading.Thread(target=handle_socket_connection)
-    #socket_thread.daemon = True  
-    # socket_thread.start()
 
+    socket_thread = threading.Thread(target=handle_socket_connection)
+    socket_thread.daemon = True  
+    socket_thread.start()
+ 
     app = MainApplication()
     app.mainloop() 
