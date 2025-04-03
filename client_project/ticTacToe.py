@@ -133,8 +133,41 @@ class TicTacToe(ttk.Frame):
         ]
         for condition in win_conditions:
             if self.board[condition[0]] == self.board[condition[1]] == self.board[condition[2]] != "":
+                winner = self.board[condition[0]]
+                if winner == self.current_player:
+                    self.request_result_image('win')
+                else:
+                    self.request_result_image('lose')
                 return True
+        if "" not in self.board:
+            self.request_result_image('draw')
+            return False
         return False
+
+    def request_result_image(self, result_type):
+        if hasattr(self, 'tcp_client') and self.tcp_client:
+            try:
+                self.tcp_client.send_game_move(None, {
+                    'request_type': 'result_image',
+                    'result': result_type
+                })
+            except Exception as e:
+                print(f"Failed to request image: {e}")
+
+    def display_result_image(self, image_data):
+        try:
+            if not hasattr(self, 'image_frame'):
+                self.image_frame = ttk.Frame(self)
+                self.image_frame.pack(pady=10)
+                self.image_label = ttk.Label(self.image_frame)
+                self.image_label.pack()
+
+            photo_image = self.tcp_client.receive_game_result_image(image_data)
+            if photo_image:
+                self.image_label.configure(image=photo_image)
+                self.image_label.image = photo_image
+        except Exception as e:
+            print(f"Error displaying image: {e}")
 
     def reset_game(self):
         self.board = [""] * 9

@@ -5,7 +5,9 @@ import random
 from ticTacToe import TicTacToe
 from coinFlip import CoinFlip
 from wordleGame import WordleGame
-from gameModeMenu import gameModeMenu
+from rps import RockPaperScissors
+from gameModeMenu import GameModeMenu
+from connection.client_tcp import TCPClient
 
 # ------------------ Main Application ------------------ #
 class MainApplication(tk.Tk):
@@ -14,6 +16,11 @@ class MainApplication(tk.Tk):
         self.title("Game Suite")
         self.geometry("800x600")
         self.configure(bg="#2E3440")
+        
+        # Initialize TCP client
+        self.tcp_client = TCPClient()
+        self.tcp_client.connect("127.0.0.1", 65432)
+        
         self.create_main_menu()
 
     def clear_window(self):
@@ -23,26 +30,75 @@ class MainApplication(tk.Tk):
     def create_main_menu(self):
         self.clear_window()
 
-        title = ttk.Label(self, text="Group 3 Game Hub", font=("Arial", 24, "bold"))
+        title = ttk.Label(self, text="Packet Play", font=("Arial", 24, "bold"))
         title.pack(pady=50)
 
-        games = [
-            ("Tic-Tac-Toe", TicTacToe),
-            ("Wordle", WordleGame),
-            ("Flip a Coin", CoinFlip)
-        ]
+        # Create buttons frame
+        button_frame = ttk.Frame(self)
+        button_frame.pack(expand=True)
 
-        for game_text, game_class in games:
-            btn = ttk.Button(self, text=game_text, command=lambda g=game_class: self.start_game(g))
-            btn.pack(pady=10)
+        # Style for buttons
+        style = ttk.Style()
+        style.configure("Game.TButton", font=("Arial", 14), padding=20)
 
-        quit_btn = ttk.Button(self, text="Exit", command=self.destroy)
-        quit_btn.pack(pady=20)
+        # Tic Tac Toe button
+        ttk.Button(
+            button_frame,
+            text="Tic-Tac-Toe",
+            style="Game.TButton",
+            command=lambda: self.show_game_mode_menu("tictactoe")
+        ).pack(pady=10)
 
-    def start_game(self, game_class):
+        # Rock Paper Scissors button
+        ttk.Button(
+            button_frame,
+            text="Rock Paper Scissors",
+            style="Game.TButton",
+            command=lambda: self.show_game_mode_menu("rps")
+        ).pack(pady=10)
+
+        # Wordle button
+        ttk.Button(
+            button_frame,
+            text="Wordle",
+            style="Game.TButton",
+            command=self.start_wordle
+        ).pack(pady=10)
+
+        # Coin Flip button
+        ttk.Button(
+            button_frame,
+            text="Flip a Coin",
+            style="Game.TButton",
+            command=self.start_coin_flip
+        ).pack(pady=10)
+
+        # Exit button
+        ttk.Button(
+            self,
+            text="Exit",
+            command=self.destroy
+        ).pack(pady=20)
+
+    def show_game_mode_menu(self, game_type):
         self.clear_window()
-        game_instance = game_class(self, self.create_main_menu)
-        game_instance.pack(expand=True, fill="both")
+        mode_menu = GameModeMenu(
+            self,
+            self.tcp_client,
+            self.create_main_menu,
+            game_type=game_type
+        )
+        mode_menu.pack(expand=True, fill='both')
+
+    def start_wordle(self):
+        self.clear_window()
+        game = WordleGame(self, self.create_main_menu)
+        game.pack(expand=True, fill="both")
+
+    def start_coin_flip(self):
+        self.clear_window()
+        game = CoinFlip(self, self.create_main_menu)
+        game.pack(expand=True, fill="both")
 
 if __name__ == "__main__":
     app = MainApplication()
