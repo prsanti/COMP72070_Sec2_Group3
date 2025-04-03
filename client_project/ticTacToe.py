@@ -29,6 +29,15 @@ class TicTacToe(ttk.Frame):
 
         self.create_widgets()
 
+    def return_to_menu(self):
+        # Destroy all widgets in this frame
+        for widget in self.winfo_children():
+            widget.destroy()
+        # Destroy the frame itself
+        self.destroy()
+        # Call the main menu callback
+        self.main_menu_callback()
+
     def create_widgets(self):
         # Create a frame for the grid
         self.grid_frame = ttk.Frame(self)
@@ -43,7 +52,7 @@ class TicTacToe(ttk.Frame):
             self.buttons.append(btn)
 
         # Position the "Main Menu" button below the grid
-        back_btn = ttk.Button(self, text="Main Menu", command=self.main_menu_callback)
+        back_btn = ttk.Button(self, text="Main Menu", command=self.return_to_menu)
         back_btn.pack(pady=20)
 
     def make_move(self, idx):

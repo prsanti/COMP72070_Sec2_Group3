@@ -24,12 +24,16 @@ class MainApplication(tk.Tk):
         self.create_main_menu()
 
     def clear_window(self):
+        # Destroy all widgets in the window
         for widget in self.winfo_children():
             widget.destroy()
+            widget.pack_forget()  # Ensure the widget is removed from the packing manager
 
     def create_main_menu(self):
+        # First clear the window
         self.clear_window()
-
+        
+        # Then create the main menu
         title = ttk.Label(self, text="Packet Play", font=("Arial", 24, "bold"))
         title.pack(pady=50)
 
