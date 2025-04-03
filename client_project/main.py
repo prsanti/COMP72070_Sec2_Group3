@@ -14,7 +14,7 @@ class MainApplication(tk.Tk):
     def __init__(self):
         super().__init__()
         self.title("Game Suite")
-        self.geometry("800x600")
+        self.geometry("800x600")  # Set a fixed window size
         self.configure(bg="#2E3440")
         
         # Initialize TCP client
@@ -92,5 +92,10 @@ class MainApplication(tk.Tk):
         game.pack(expand=True, fill="both")
 
 if __name__ == "__main__":
+    # Create a socket and connect to the server
+    socket_thread = threading.Thread(target=handle_socket_connection)
+    socket_thread.daemon = True  
+    socket_thread.start()
+
     app = MainApplication()
-    app.mainloop()
+    app.mainloop() 

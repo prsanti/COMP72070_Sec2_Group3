@@ -1,13 +1,11 @@
 import tkinter as tk
 from tkinter import ttk, messagebox
-from PIL import ImageTk, Image
-import random
 
-# This is just a small function to run the tic tac toe game
 class TicTacToe(ttk.Frame):
     def __init__(self, parent, main_menu_callback, is_multiplayer=False, tcp_client=None):
         super().__init__(parent)
         self.parent = parent
+        self.tcp_client = tcp_client
         self.main_menu_callback = main_menu_callback
         self.is_multiplayer = is_multiplayer
         self.tcp_client = tcp_client
@@ -40,7 +38,11 @@ class TicTacToe(ttk.Frame):
 
     def create_widgets(self):
         # Create a frame for the grid
+        # Create a frame for the grid
         self.grid_frame = ttk.Frame(self)
+        self.grid_frame.pack(expand=True, pady=20)
+
+        # Create buttons for the Tic-Tac-Toe grid
         self.grid_frame.pack(expand=True, pady=20)
 
         # Create buttons for the Tic-Tac-Toe grid
@@ -136,6 +138,9 @@ class TicTacToe(ttk.Frame):
 
     def check_winner(self):
         win_conditions = [
+            [0, 1, 2], [3, 4, 5], [6, 7, 8],  # Rows
+            [0, 3, 6], [1, 4, 7], [2, 5, 8],  # Columns
+            [0, 4, 8], [2, 4, 6]  # Diagonals
             [0, 1, 2], [3, 4, 5], [6, 7, 8],  # Rows
             [0, 3, 6], [1, 4, 7], [2, 5, 8],  # Columns
             [0, 4, 8], [2, 4, 6]  # Diagonals
