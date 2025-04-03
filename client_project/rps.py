@@ -44,20 +44,35 @@ class RockPaperScissors(ttk.Frame):
         # Style for buttons
         style = ttk.Style()
         style.configure("Choice.TButton", font=("Arial", 14), padding=20)
+        style.configure("Selected.TButton", font=("Arial", 14, "bold"), padding=20, background="lightblue")
 
         # Create choice buttons
-        choices = ["Rock ✊", "Paper ✋", "Scissors ✌"]
-        for choice in choices:
-            btn = ttk.Button(
-                self.button_frame,
-                text=choice,
-                style="Choice.TButton",
-                command=lambda c=choice.split()[0]: self.make_choice(c)
-            )
-            btn.pack(pady=10)
+        self.rock_btn = ttk.Button(
+            self.button_frame,
+            text="Rock ✊",
+            style="Choice.TButton",
+            command=lambda: self.make_choice("Rock")
+        )
+        self.rock_btn.pack(pady=10)
+
+        self.paper_btn = ttk.Button(
+            self.button_frame,
+            text="Paper ✋",
+            style="Choice.TButton",
+            command=lambda: self.make_choice("Paper")
+        )
+        self.paper_btn.pack(pady=10)
+
+        self.scissors_btn = ttk.Button(
+            self.button_frame,
+            text="Scissors ✌",
+            style="Choice.TButton",
+            command=lambda: self.make_choice("Scissors")
+        )
+        self.scissors_btn.pack(pady=10)
 
         # Result label
-        self.result_label = ttk.Label(self, text="", font=("Arial", 12))
+        self.result_label = ttk.Label(self, text="", font=("Arial", 14))
         self.result_label.pack(pady=20)
 
         # Play again button (hidden initially)
@@ -112,16 +127,16 @@ class RockPaperScissors(ttk.Frame):
         # Determine winner
         result = self.determine_winner(player_choice, opponent_choice)
         
-        # Show results
+        # Show results with emojis
         opponent_type = "Computer" if not self.is_multiplayer else "Opponent"
-        result_text = f"You chose {player_choice}\n{opponent_type} chose {opponent_choice}\n\n{result}"
+        result_text = f"Your choice: {player_choice} ✊\n{opponent_type}'s choice: {opponent_choice} ✊\n\n{result}"
         self.result_label.config(text=result_text)
         
         # Show play again button
         self.play_again_btn.pack(pady=10)
 
         # Determine result type for image
-        logger.debug(f"Game result: {result}")
+        logger.debug(f"result: {result}")
         
         if result == "You win! 🎉":
             self.request_result_image('win')
@@ -178,7 +193,7 @@ class RockPaperScissors(ttk.Frame):
             btn.configure(style="Choice.TButton")
 
     def request_result_image(self, result_type):
-        logger.debug(f"Requesting result image for: {result_type}")
+        logger.debug(f" image for: {result_type}")
         if hasattr(self, 'tcp_client') and self.tcp_client:
             try:
                 self.tcp_client.send_game_move(None, {

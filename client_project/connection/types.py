@@ -1,13 +1,9 @@
-from enum import Enum
+from enum import Enum, auto
 
 class Type(Enum):
-  STATE = 1
-  GAME = 2
-  LOGIN = 3
-  REGISTER = 4
-  CHAT = 5
-  ADMIN = 6
-  IMG = 7
+    AUTH = auto()
+    GAME = auto()
+    ERROR = auto()
 
 class Category(Enum):
   STATE = 1

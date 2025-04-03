@@ -37,7 +37,8 @@ def serverON(server: TCP):
     # close cursor after each transaction
     connection.close()
 
-    client_socket, addr = server.accept_client()
+    # Use the standard socket accept method instead of a non-existent accept_client method
+    client_socket, addr = server.server_socket.accept()
 
     if client_socket:
         
@@ -61,13 +62,13 @@ def serverON(server: TCP):
             elif (received_packet.type == Type.LOGIN and received_packet.category == Category.SIGNUP):
                 # move into function in requests.py
                 loginInfo: str = received_packet.command.split()
+
                 username: str = loginInfo[0]
                 password: str = loginInfo[1]
 
                 connection, cursor = database.connectAndCreateCursor()
 
                 
-        server.close_client(client_socket)
     else:
         print("No client connected, continuing to wait...")
 
@@ -101,7 +102,8 @@ if __name__ == '__main__':
         from gui import server_ui  # 🛠 Import after database setup
         print("Initial data loaded successfully.")
 
-        ui.run(reload=False)  # Runs UI in main thread
+        # Use a different port for NiceGUI to avoid conflicts
+        ui.run(reload=False, port=8081)  # Changed port from default 8080 to 8081
         while True:
             time.sleep(1)  # Keep the script alive
     except KeyboardInterrupt:
