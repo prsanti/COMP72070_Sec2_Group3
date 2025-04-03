@@ -50,13 +50,13 @@ class LoginPage(tk.Frame):
 
         time.sleep(5)
 
-        # response: Packet = client_queue.get()
+        response: Packet = client_queue.get()
 
-        # if (response.command == "True" | "1"):
-        #     self.on_login_success(self.tcp_client)
-        # else:
-        #     messagebox.showerror("Error", "Login failed")
-        #     self.tcp_client.close()
+        if (response.command == "True" | "1"):
+            self.on_login_success(self.tcp_client)
+        else:
+            messagebox.showerror("Error", "Login failed")
+            self.tcp_client.close()
 
 
     def continue_offline(self):

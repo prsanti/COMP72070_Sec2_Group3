@@ -10,7 +10,7 @@ class User:
         self.userID = None
         self.email= email
         self.username = username
-        self.password = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
+        self.password = password
         self.isAdmin = False
 
     # initialize user from database info
@@ -44,21 +44,28 @@ def getAllUsers(cursor: sqlite3.Cursor):
     return userData
 
 
-def verifyLogin(cursor: sqlite3.Cursor, username: str, password):
-    # hash password because password is hashed in the db
-    hashedPassword = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
-
+def verifyLogin(cursor: sqlite3.Cursor, username: str, password: str):
     # query to select login info from database
-    getUserFromDB = """SELECT Email, Username, Password FROM users WHERE (Email LIKE ?) OR (Username LIKE ?) """
-    cursor.execute(getUserFromDB, username, username)
+    print("getting user login info")
+    getUserFromDB = """SELECT Email, Username, Password FROM users WHERE (Email LIKE ?) OR (Username LIKE ?)"""
+    cursor.execute(getUserFromDB, (username, username))  # Corrected the parameters tuple
     user = cursor.fetchone()
 
-    # check if username (which can be entered as username or email) matches 
-    # user[0] = email, user[1] = username , user[2] = password
-    if (user[0] == username | user[1] == username & user[2] == hashedPassword):
-        return True
-    else:
+
+    # Ensure we found a user
+    if user is None:
         return False
+
+
+    # check if username (which can be entered as username or email) matches
+    # user[0] = email, user[1] = username , user[2] = password
+    if (user[0] == username or user[1] == username and user[2] == password):
+        print("valid username")
+        # Check if the stored password is in a valid bcrypt hash format
+        return True
+
+
+    return False
 
 def enableUserAdmin(user: User):
     user.isAdmin = True
