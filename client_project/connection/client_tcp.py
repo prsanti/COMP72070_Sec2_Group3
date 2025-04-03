@@ -5,7 +5,7 @@ class TCPClient:
     def __init__(self, host='127.0.0.1', port=27000):
         self.host = host
         self.port = port
-        self.client_id = None
+        self.client_id = host
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.connected = False
 

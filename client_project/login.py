@@ -2,6 +2,7 @@ import tkinter as tk
 from tkinter import messagebox
 from connection.client_tcp import TCPClient
 from connection.packet import Packet, Type, Category
+import time
 
 class LoginPage(tk.Frame):
     def __init__(self, parent, on_login_success):
@@ -30,6 +31,7 @@ class LoginPage(tk.Frame):
 
     def login(self):
         from main import connection_queue
+        from main import client_queue
         username = self.username_entry.get()
         password = self.password_entry.get()
 
@@ -37,9 +39,18 @@ class LoginPage(tk.Frame):
             messagebox.showerror("Error", "Please enter both username and password")
             return
 
-        login_packet = Packet(self.tcp_client.client_id, Type.LOGIN, Category.STATE, f"{username} {password}")
-        connection_queue.put(login_packet)
-        print("Login packet added to the queue") 
+        login_packet = Packet(self.tcp_client.client_id, Type.LOGIN, Category.LOGIN, f"{username} {password}")
+        
+
+        try:
+            connection_queue.put(login_packet, block=False)  # Try adding without blocking
+            print("Login packet added to the queue")
+        except connection_queue.Full:
+            print("Queue is full, cannot add packet")
+
+        time.sleep(5)
+
+        # response: Packet = client_queue.get()
 
         # if (response.command == "True" | "1"):
         #     self.on_login_success(self.tcp_client)
