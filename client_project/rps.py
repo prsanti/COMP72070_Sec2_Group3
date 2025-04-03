@@ -14,16 +14,18 @@ class RockPaperScissors(ttk.Frame):
         self.is_multiplayer = is_multiplayer
         self.tcp_client = tcp_client
         if self.tcp_client:
-            self.tcp_client.current_game = self  # Set this instance as the current game
-        self.player_choice = None
-        self.opponent_choice = None
-        
-        # Define custom styles
-        self.style = ttk.Style()
-        self.style.configure("Choice.TButton", font=("Arial", 14), padding=20)
-        self.style.configure("Selected.TButton", background="lightblue")
-        
+            self.tcp_client.current_game = self
+
         self.create_widgets()
+
+    def return_to_menu(self):
+        # Destroy all widgets in this frame
+        for widget in self.winfo_children():
+            widget.destroy()
+        # Destroy the frame itself
+        self.destroy()
+        # Call the main menu callback
+        self.main_menu_callback()
 
     def create_widgets(self):
         # Title
@@ -35,37 +37,27 @@ class RockPaperScissors(ttk.Frame):
         mode_label = ttk.Label(self, text=mode_text, font=("Arial", 12))
         mode_label.pack(pady=10)
 
-        # Choice buttons frame
-        button_frame = ttk.Frame(self)
-        button_frame.pack(expand=True, pady=20)
+        # Create buttons frame
+        self.button_frame = ttk.Frame(self)
+        self.button_frame.pack(expand=True)
+
+        # Style for buttons
+        style = ttk.Style()
+        style.configure("Choice.TButton", font=("Arial", 14), padding=20)
 
         # Create choice buttons
-        self.rock_btn = ttk.Button(
-            button_frame,
-            text="🪨 Rock",
-            style="Choice.TButton",
-            command=lambda: self.make_choice("Rock")
-        )
-        self.rock_btn.pack(pady=10)
-
-        self.paper_btn = ttk.Button(
-            button_frame,
-            text="📄 Paper",
-            style="Choice.TButton",
-            command=lambda: self.make_choice("Paper")
-        )
-        self.paper_btn.pack(pady=10)
-
-        self.scissors_btn = ttk.Button(
-            button_frame,
-            text="✂️ Scissors",
-            style="Choice.TButton",
-            command=lambda: self.make_choice("Scissors")
-        )
-        self.scissors_btn.pack(pady=10)
+        choices = ["Rock ✊", "Paper ✋", "Scissors ✌"]
+        for choice in choices:
+            btn = ttk.Button(
+                self.button_frame,
+                text=choice,
+                style="Choice.TButton",
+                command=lambda c=choice.split()[0]: self.make_choice(c)
+            )
+            btn.pack(pady=10)
 
         # Result label
-        self.result_label = ttk.Label(self, text="", font=("Arial", 16))
+        self.result_label = ttk.Label(self, text="", font=("Arial", 12))
         self.result_label.pack(pady=20)
 
         # Play again button (hidden initially)
@@ -76,8 +68,12 @@ class RockPaperScissors(ttk.Frame):
         )
 
         # Back button
-        back_btn = ttk.Button(self, text="Back to Main Menu", command=self.main_menu_callback)
-        back_btn.pack(pady=20)
+        back_btn = ttk.Button(
+            self,
+            text="Back to Main Menu",
+            command=self.return_to_menu
+        )
+        back_btn.pack(pady=10)
 
     def make_choice(self, choice):
         self.player_choice = choice

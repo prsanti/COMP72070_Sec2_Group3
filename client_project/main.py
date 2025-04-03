@@ -30,56 +30,43 @@ class MainApplication(tk.Tk):
             widget.pack_forget()  # Ensure the widget is removed from the packing manager
 
     def create_main_menu(self):
-        # First clear the window
         self.clear_window()
-        
-        # Then create the main menu
-        title = ttk.Label(self, text="Packet Play", font=("Arial", 24, "bold"))
-        title.pack(pady=50)
+
+        # Create main frame
+        main_frame = ttk.Frame(self)
+        main_frame.pack(expand=True, fill='both')
+
+        # Title
+        title_label = ttk.Label(main_frame, text="Packet Play", font=("Arial", 24, "bold"))
+        title_label.pack(pady=50)
 
         # Create buttons frame
-        button_frame = ttk.Frame(self)
+        button_frame = ttk.Frame(main_frame)
         button_frame.pack(expand=True)
 
         # Style for buttons
         style = ttk.Style()
         style.configure("Game.TButton", font=("Arial", 14), padding=20)
 
-        # Tic Tac Toe button
-        ttk.Button(
-            button_frame,
-            text="Tic-Tac-Toe",
-            style="Game.TButton",
-            command=lambda: self.show_game_mode_menu("tictactoe")
-        ).pack(pady=10)
+        # Game buttons
+        games = [
+            ("Tic-Tac-Toe", lambda: self.show_game_mode_menu("tictactoe")),
+            ("Rock Paper Scissors", lambda: self.show_game_mode_menu("rps")),
+            ("Wordle", self.start_wordle),
+            ("Flip a Coin", self.start_coin_flip)
+        ]
 
-        # Rock Paper Scissors button
-        ttk.Button(
-            button_frame,
-            text="Rock Paper Scissors",
-            style="Game.TButton",
-            command=lambda: self.show_game_mode_menu("rps")
-        ).pack(pady=10)
-
-        # Wordle button
-        ttk.Button(
-            button_frame,
-            text="Wordle",
-            style="Game.TButton",
-            command=self.start_wordle
-        ).pack(pady=10)
-
-        # Coin Flip button
-        ttk.Button(
-            button_frame,
-            text="Flip a Coin",
-            style="Game.TButton",
-            command=self.start_coin_flip
-        ).pack(pady=10)
+        for game_name, command in games:
+            ttk.Button(
+                button_frame,
+                text=game_name,
+                style="Game.TButton",
+                command=command
+            ).pack(pady=10)
 
         # Exit button
         ttk.Button(
-            self,
+            main_frame,
             text="Exit",
             command=self.destroy
         ).pack(pady=20)
@@ -89,7 +76,7 @@ class MainApplication(tk.Tk):
         mode_menu = GameModeMenu(
             self,
             self.tcp_client,
-            self.create_main_menu,
+            self.create_main_menu,  # Pass the method directly
             game_type=game_type
         )
         mode_menu.pack(expand=True, fill='both')

@@ -46,41 +46,19 @@ class GameModeMenu(ttk.Frame):
         vs_human_btn.pack(pady=10)
         
         # Back button
-        back_btn = ttk.Button(self, text="Back to Game Selection", command=self.back_to_game_selection)
+        back_btn = ttk.Button(self, text="Back to Main Menu", command=self.main_menu_callback)
         back_btn.pack(pady=20)
-
-    def back_to_game_selection(self):
-        self.destroy()
-        from game_selection import GameSelection
-        game_select = GameSelection(
-            self.parent,
-            self.tcp_client,
-            self.main_menu_callback,
-            lambda: self.show_game_mode("tictactoe"),
-            None,  # wordle_callback
-            None   # coin_flip_callback
-        )
-        game_select.pack(expand=True, fill='both')
-
-    def show_game_mode(self, game_type):
-        self.destroy()
-        mode_menu = GameModeMenu(self.parent, self.tcp_client, self.main_menu_callback, game_type=game_type)
-        mode_menu.pack(expand=True, fill='both')
 
     def start_single_player(self):
         self.destroy()
-        if self.game_type == "tictactoe":
-            game = TicTacToe(self.parent, self.back_to_game_selection, is_multiplayer=False)
-        else:
-            game = RockPaperScissors(self.parent, self.back_to_game_selection, is_multiplayer=False)
+        game_class = TicTacToe if self.game_type == "tictactoe" else RockPaperScissors
+        game = game_class(self.parent, self.main_menu_callback, is_multiplayer=False)
         game.pack(expand=True, fill='both')
 
     def start_multiplayer(self):
         self.destroy()
-        if self.game_type == "tictactoe":
-            game = TicTacToe(self.parent, self.back_to_game_selection, is_multiplayer=True, tcp_client=self.tcp_client)
-        else:
-            game = RockPaperScissors(self.parent, self.back_to_game_selection, is_multiplayer=True, tcp_client=self.tcp_client)
+        game_class = TicTacToe if self.game_type == "tictactoe" else RockPaperScissors
+        game = game_class(self.parent, self.main_menu_callback, is_multiplayer=True, tcp_client=self.tcp_client)
         game.pack(expand=True, fill='both')
 
 if __name__ == "__main__":

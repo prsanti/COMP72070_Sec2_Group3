@@ -52,7 +52,7 @@ class TicTacToe(ttk.Frame):
             self.buttons.append(btn)
 
         # Position the "Main Menu" button below the grid
-        back_btn = ttk.Button(self, text="Main Menu", command=self.return_to_menu)
+        back_btn = ttk.Button(self, text="Back to Main Menu", command=self.return_to_menu)
         back_btn.pack(pady=20)
 
     def make_move(self, idx):
