@@ -1,28 +1,32 @@
 import sqlite3
 import pathlib
+from .wordle import createWordleTable
+from .users import createUserTable
+from .packets import createPacketTable
+from .chatLogs import createChatTable
 
 dbPath = "serverData"
 
 listOfTables = ["users", "wordle", "chatlogs", "packets"]
 
-class Connection:
-    _conn = None
-
-    def __init__(self):
-        if self._conn is None:
-            self._conn = sqlite3.connect(dbPath)
-        self.cursor = self._conn.cursor()
-
-    def __del__(self):
-        if self._conn is not None:
-            self._conn.close()
-            self._conn = None
-
-# will connect to database or make a new database
-def connectOrMakeNewDB():
+def setup_database():
     connection = sqlite3.connect(dbPath)
-    return connection
+    cursor = connection.cursor()
+    cursor.execute("PRAGMA journal_mode=WAL;")  # Enables write-ahead logging
+    
+    createWordleTable(cursor=cursor)
+    createUserTable(cursor=cursor)
+    createChatTable(cursor=cursor)
+    createPacketTable(cursor=cursor)
 
+    connection.commit()
+    connection.close()
+
+def connectAndCreateCursor():
+    connection = sqlite3.connect(dbPath, check_same_thread=False)
+    cursor = connection.cursor()
+    return connection, cursor
+    
 
 # will only connect if db exists
 def connectIfDBExists():
@@ -49,14 +53,10 @@ def closeCursor(cursor):
     cursor.close()
 
 def verifyTableExists(cursor, table: str):
-    listOfTables = cursor.execute(
-  f"""SELECT tableName FROM sqlite_master WHERE type='table'
-  AND tableName='{table}'; """).fetchall()
-    
-    if listOfTables == []:
-        return False
-    else:
-        return True
+    query = f"SELECT name FROM sqlite_master WHERE type='table' AND name='{table}';"
+    cursor.execute(query)
+    result = cursor.fetchone()
+    return result is not None
     
 def dropTable(cursor, table: str):
     cursor.execute(f"""DROP table if exists {table}""")
