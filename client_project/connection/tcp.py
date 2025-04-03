@@ -58,6 +58,8 @@ class TCP:
                 print("Client disconnected.")
                 self.clients.remove(client_socket)
                 client_socket.close()
+        except BlockingIOError:
+            return None
         except socket.error as e:
             print(f"Error receiving packet: {e}")
 

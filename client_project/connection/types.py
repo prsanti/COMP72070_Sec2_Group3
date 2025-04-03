@@ -6,8 +6,13 @@ class Type(Enum):
     ERROR = auto()
 
 class Category(Enum):
-    LOGIN = auto()
-    REGISTER = auto()
-    MOVE = auto()
-    START = auto()
-    END = auto() 
+  STATE = 1
+  TICTACTOE = 2
+  WORDLE = 3
+  RPS = 4
+  WIN = 5
+  LOSE = 6
+  DRAW = 7
+  LOGIN = 8
+  SIGNUP = 9
+  

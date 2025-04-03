@@ -18,3 +18,6 @@ class Packet:
   @staticmethod
   def deserialize(data: bytes):
       return pickle.loads(data)
+  
+  def getPacketType(self):
+     return self.type

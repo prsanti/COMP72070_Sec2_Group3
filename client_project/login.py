@@ -2,6 +2,7 @@ import tkinter as tk
 from tkinter import messagebox
 from connection.client_tcp import TCPClient
 from connection.packet import Packet, Type, Category
+import time
 
 class LoginPage(tk.Frame):
     def __init__(self, parent, on_login_success):
@@ -12,7 +13,7 @@ class LoginPage(tk.Frame):
         self.create_widgets()
 
     def create_widgets(self):
-        self.username_label = tk.Label(self, text="Username:")
+        self.username_label = tk.Label(self, text="Email or Username:")
         self.username_label.pack(pady=5)
         self.username_entry = tk.Entry(self)
         self.username_entry.pack(pady=5)
@@ -29,6 +30,8 @@ class LoginPage(tk.Frame):
         self.offline_button.pack(pady=10)
 
     def login(self):
+        from main import connection_queue
+        from main import client_queue
         username = self.username_entry.get()
         password = self.password_entry.get()
 
@@ -36,19 +39,25 @@ class LoginPage(tk.Frame):
             messagebox.showerror("Error", "Please enter both username and password")
             return
 
-        self.tcp_client.connect()
-        if self.tcp_client.connected:
-            login_packet = Packet(self.tcp_client.client_id, Type.LOGIN, Category.STATE, "login", {"username": username, "password": password})
-            self.tcp_client.send_packet(login_packet)
-            response = self.tcp_client.receive_packet()
-            if response and response.command == "login_success":
-                self.on_login_success(self.tcp_client)
-            else:
-                messagebox.showerror("Error", "Login failed")
-                self.tcp_client.close()
-        else:
-            messagebox.showwarning("Connection Failed", "Unable to connect to server. Continuing in offline mode.")
-            self.continue_offline()
+        login_packet = Packet(self.tcp_client.client_id, Type.LOGIN, Category.LOGIN, f"{username} {password}")
+        
+
+        try:
+            connection_queue.put(login_packet, block=False)  # Try adding without blocking
+            print("Login packet added to the queue")
+        except connection_queue.Full:
+            print("Queue is full, cannot add packet")
+
+        time.sleep(5)
+
+        # response: Packet = client_queue.get()
+
+        # if (response.command == "True" | "1"):
+        #     self.on_login_success(self.tcp_client)
+        # else:
+        #     messagebox.showerror("Error", "Login failed")
+        #     self.tcp_client.close()
+
 
     def continue_offline(self):
         self.tcp_client.close()

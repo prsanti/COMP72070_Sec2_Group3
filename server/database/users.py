@@ -1,4 +1,4 @@
-from database import verifyTableExists, Connection
+
 import sqlite3
 import bcrypt
 
@@ -36,12 +36,20 @@ def getUserInfo(cursor: sqlite3.Cursor, userID: int):
         # if no user is found
         return None
 
+def getAllUsers(cursor: sqlite3.Cursor):
+    selectAllUsers = """SELECT UserID, Username, Email, isAdmin FROM users"""
+    cursor.execute(selectAllUsers)
+    userData = cursor.fetchall()
+
+    return userData
+
+
 def verifyLogin(cursor: sqlite3.Cursor, username: str, password):
     # hash password because password is hashed in the db
     hashedPassword = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
 
     # query to select login info from database
-    getUserFromDB = """SELECT Email, username, password FROM Users WHERE (Email LIKE ?) OR (UserName LIKE ?) """
+    getUserFromDB = """SELECT Email, Username, Password FROM users WHERE (Email LIKE ?) OR (Username LIKE ?) """
     cursor.execute(getUserFromDB, username, username)
     user = cursor.fetchone()
 
@@ -62,16 +70,15 @@ def disableUserAdmin(user: User):
 
 def createUserTable(cursor: sqlite3.Cursor):
 
-    # drop user table if it exists
-    cursor.execute("DROP TABLE IF EXISTS users")
  
     # Creating table
-    userTable = f""" CREATE TABLE users (
-               UserID INTEGER PRIMARY KEY
-               Email VARCHAR(255) NOT NULL UNIQUE,
-             UserName VARCHAR(25) NOT NULL UNIQUE,
-             Password VARCHAR(25) NOT NULL,
-             IsAdmin INTEGER
+    userTable = """ CREATE TABLE IF NOT EXISTS users (
+               UserID INTEGER PRIMARY KEY, 
+               Email VARCHAR(255) NOT NULL,
+               Username VARCHAR(25) NOT NULL,
+               Password VARCHAR(25) NOT NULL,
+               IsAdmin INTEGER,
+               UNIQUE(Email, Username) 
           ); """
  
     cursor.execute(userTable)
@@ -79,19 +86,20 @@ def createUserTable(cursor: sqlite3.Cursor):
 def addUserToTable(cursor: sqlite3.Cursor, user: User):
 
     # create table if it does
+    from .database import verifyTableExists
+
     if not verifyTableExists(cursor, "users"):
         createUserTable(cursor)
 
-    # set userID to null will enable auto increment because its the primary key
-    newUser = f""" insert into users (UserID, Email, Username, Password, isAdmin) 
-        values(NULL, {User.email}, {User.username}, {User.password}, {User.isAdmin})"""
+    newUser = f"""INSERT OR IGNORE INTO users (UserID, Email, Username, Password, isAdmin) 
+                VALUES (NULL, '{user.email}', '{user.username}', '{user.password}', {user.isAdmin})"""
         
     cursor.execute(newUser)
 
 def updateUser(cursor: sqlite3.Cursor, user: User):
     updateUser = f"""UPDATE users
     SET Email = '{user.email}', 
-    UserName = '{user.username}',
+    Username = '{user.username}',
     Password = '{user.password}',
     isAdmin = '{user.isAdmin}
     WHERE UserID = {user.userID};"""

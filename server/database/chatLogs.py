@@ -1,6 +1,7 @@
 import datetime
 import sqlite3
-from users import User
+from database.users import User
+server_start_time = datetime.datetime.now()
 
 class Message:
 
@@ -16,14 +17,14 @@ class Message:
 def createChatTable(cursor):
     cursor.execute('''
     CREATE TABLE IF NOT EXISTS messages (
-    messageID INTEGER PRIMARY KEY AUTOINCREMENT,
-    userID INTEGER NOT NULL,
-    message TEXT NOT NULL,
-    date TEXT NOT NULL,
-    FOREIGN KEY (userID) REFERENCES users(UserID)
-    
+        messageID INTEGER PRIMARY KEY AUTOINCREMENT,
+        userID INTEGER NOT NULL,
+        message TEXT NOT NULL,
+        date TEXT NOT NULL,
+        FOREIGN KEY (userID) REFERENCES users(UserID)
     );
     ''')
+
         
 def insertMessage(cursor: sqlite3.Cursor, message: Message):
     
@@ -34,7 +35,7 @@ def insertMessage(cursor: sqlite3.Cursor, message: Message):
     
     cursor.connection.commit()
 
-def getAllMessages(cursor: sqlite3.Cursor, message: Message):
+def getAllMessages(cursor: sqlite3.Cursor):
     selectMessage = """SELECT * FROM messages"""
     
     cursor.execute(selectMessage)
@@ -44,3 +45,8 @@ def getAllMessages(cursor: sqlite3.Cursor, message: Message):
     return messageData
 
 
+def getRecentMessages(cursor: sqlite3.Cursor):
+    # Fetch only the messages that are considered "new" after server started
+    select_message = """SELECT * FROM messages WHERE date > ?"""  # Customize as needed (e.g., server start time)
+    cursor.execute(select_message, (server_start_time,))
+    return cursor.fetchall()

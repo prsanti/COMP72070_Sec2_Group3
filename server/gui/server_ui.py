@@ -1,25 +1,71 @@
 from nicegui import ui
-from database import wordle
+from database import wordle, chatLogs, users
 from database import database
 
 # hard coded data for visuals
-# connect to db and populate data
-connection = database.connectOrMakeNewDB()
-cursor = database.createCursor(connection)
 connected_clients = ["Client 1 - User1 - Playing tictactoe", "Client 2 - User2 - Playing tictactoe"]
-chat_logs = ["User1: hiii", "User2: Hello", "User1: glhf<3"]
-database_info = {"User1": "Admin", "User2": "Player"}
-wordle.createWordleTable(cursor)
-wordle_list = wordle.getAllWords(cursor)
-#wordle_list = ["Apple", "Badly", "Cache", "Dread"]
+chat_logs = []  # All chat history (from the database)
+current_chat_logs = []  # Only new chat logs added after server start
+wordle_list = []
+database_info = []
+
 game_scores = ["Tic Tac Toe | User | Moves | Result", "Wordle | User | Guess | Result"]
 
-def send_message(value):
-    chat_logs.append(f"Server: {value}")
-    chat_log_container.clear()
-    with chat_log_container:
-        for log in chat_logs:
+def load_initial_data():
+    global chat_logs, wordle_list, database_info
+    conn, cursor = database.connectAndCreateCursor()
+    chat_logs = chatLogs.getAllMessages(cursor=cursor)  # Load all chat history from the database
+    current_chat_logs.clear()  # Ensure the current chat logs are empty at the start
+    wordle_list = wordle.getAllWords(cursor=cursor)
+    database_info = users.getAllUsers(cursor=cursor)
+    conn.close()  
+
+def get_updated_data():
+    conn, cursor = database.connectAndCreateCursor()
+    chat_logs[:] = chatLogs.getAllMessages(cursor=cursor)  # Reload all chat history from the database
+    current_chat_logs[:] = chatLogs.getRecentMessages(cursor=cursor)  # Reload only the most recent chat logs
+    database_info[:] = users.getAllUsers(cursor=cursor)
+    conn.close()  
+    update_chat_display()
+    update_database_info_display()
+
+def update_chat_display():
+    current_chat_log_container.clear()  # Clear the current chat logs section
+    with current_chat_log_container:
+        for log in current_chat_logs:
             ui.label(log)
+
+def update_database_info_display():
+    database_info_container.clear()
+    
+    with database_info_container:
+        with ui.row().style("font-weight: bold;"):
+            ui.label("UserID").style("width: 80px;")
+            ui.label("Username").style("width: 150px;")
+            ui.label("Email").style("width: 150px;")
+            ui.label("Role").style("width: 15%;")
+
+        # Populate the table with user data
+        for user_id, username, email, is_admin in database_info:
+            role = "Admin" if is_admin else "Player"
+            with ui.row().style("width: 100%;"):
+                ui.label(str(user_id)).style("width: 80px;")
+                ui.label(username).style("width: 150px;")
+                ui.label(email).style("width: 250px;")
+                ui.label(role).style("width: 100px;")
+
+def send_message(value):
+    # Add the new message to both chat history and current chat logs
+    chat_logs.append(f"Server: {value}")
+    current_chat_logs.append(f"Server: {value}")
+    
+    # Display the updated current chat logs
+    current_chat_log_container.clear()
+    with current_chat_log_container:
+        for log in current_chat_logs:
+            ui.label(log)
+    
+    get_updated_data()
 
 # def disconnect_client(index):
 #     if index < len(connected_clients):
@@ -30,6 +76,8 @@ def send_message(value):
 #                 with ui.row():
 #                     ui.label(client)
 #                     ui.button("Disconnect", on_click=lambda i=i: disconnect_client(i))
+
+load_initial_data()
 
 ui.page_title("Server Dashboard")
 
@@ -57,8 +105,8 @@ with ui.row().style("width: 100%; height: 100%; gap: 20px;"):
     with ui.column().style("flex: 1;"):
         with ui.card().style("width: 100%;"):
             ui.label("Database Information:")
-            for user, role in database_info.items():
-                ui.label(f"{user} - {role}")
+            database_info_container = ui.column()
+            update_database_info_display()
 
         with ui.card().style("width: 100%;"):
             ui.label("Word list:")
@@ -83,18 +131,19 @@ with ui.row().style("width: 100%; height: 100%; gap: 20px;"):
 
     with ui.column().style("flex: 1;"):
         with ui.card().style("width: 100%;"):
-            ui.label("Current chat logs:")
-            chat_log_container = ui.column()
-            for log in chat_logs:
-                ui.label(log)
+            ui.label("All Chat History")
+            # Display chat logs (full history) here
             with ui.row().style("flex: 1"):
-                ui.input(placeholder="Send message to all users:", on_change=lambda e: send_message(e.value))
-                ui.button("Send", on_click=lambda i=i: send_message(i.value))
+                for log in chat_logs:
+                    ui.label(log)  # Display full chat history here
+            
+            ui.input(placeholder="Send message to all users:", on_change=lambda e: send_message(e.value))
+            ui.button("Send", on_click=lambda i=i: send_message(i.value))
+
 
         with ui.card().style("width: 100%;"):
-            ui.label("All Chat History")
-            ui.label("User1 | hiii | 03/05/2025 | 12:43")
-            ui.label("User2 | Hello | 03/05/2025 | 12:43")
-            ui.label("User1 | glhf<3 | 03/05/2025 | 12:44")
-            ui.label("User3 | u suck | 02/02/2025 | 4:56")
+            ui.label("Current Chat Logs:")
+            current_chat_log_container = ui.column()  # To display only the current chat logs
+            update_chat_display()  # Initially display new chat logs (currently empty)
 
+ui.timer(5.0, get_updated_data)

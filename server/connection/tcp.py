@@ -1,6 +1,7 @@
 import socket
 import pickle
 from .packet import Packet
+from .types import State
 
 HOST = "127.0.0.1"
 PORT = 65432
@@ -17,6 +18,7 @@ class TCP:
         # Add this line to allow port reuse
         self.server_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         self.clients = []
+        self.state: State = State.WAITINGFORCONNECTION
 
     def bind(self):
         # bind server to host ip and port

@@ -10,11 +10,12 @@ logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
 
 class TCPClient:
-    def __init__(self):
-        self.socket = None
-        self.current_game = None
-        self.host = "127.0.0.1"
-        self.port = 65432
+    def __init__(self, host='127.0.0.1', port=27000):
+        self.host = host
+        self.port = port
+        self.client_id = host
+        self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.connected = False
 
     def connect(self, host, port):
         try:
