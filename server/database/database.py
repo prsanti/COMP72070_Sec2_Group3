@@ -13,7 +13,7 @@ def setup_database():
     connection = sqlite3.connect(dbPath)
     cursor = connection.cursor()
     cursor.execute("PRAGMA journal_mode=WAL;")  # Enables write-ahead logging
-    
+    dropTable(cursor=cursor, table="users")
     createWordleTable(cursor=cursor)
     createUserTable(cursor=cursor)
     createChatTable(cursor=cursor)

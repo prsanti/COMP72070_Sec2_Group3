@@ -55,13 +55,13 @@ def serverON(server: TCP):
             print(f"Processed Packet from {received_packet.client}")
             # if user tries to loging
             if (received_packet.type == Type.LOGIN and received_packet.category == Category.LOGIN):
-                requests.login_request(received_packet=received_packet, addr=addr, server=server)
+                requests.login_request(received_packet=received_packet, addr=addr, client_socket=client_socket, server=server)
+
                 
             # if user tries to sign up
             elif (received_packet.type == Type.LOGIN and received_packet.category == Category.SIGNUP):
                 # move into function in requests.py
                 loginInfo: str = received_packet.command.split()
-
                 username: str = loginInfo[0]
                 password: str = loginInfo[1]
 

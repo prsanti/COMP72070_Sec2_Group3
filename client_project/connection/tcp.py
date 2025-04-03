@@ -65,7 +65,5 @@ class TCP:
 
     def close(self):
         """Close all client connections and the server socket."""
-        for client in self.clients:
-            client.close()
         self.server_socket.close()
-        print("Server closed.")
+        print("connection closed.")
