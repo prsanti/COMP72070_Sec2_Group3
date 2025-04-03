@@ -1,7 +1,8 @@
 import tkinter as tk
 from tkinter import messagebox
 from connection.client_tcp import TCPClient
-from connection.packet import Packet, Type, Category
+from connection.packet import Packet
+from connection.types import Type, Category
 import time
 
 class LoginPage(tk.Frame):

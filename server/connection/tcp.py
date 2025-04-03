@@ -43,3 +43,37 @@ class TCP:
 
     def recieve(self):
         print("Recieve packet from client")
+        
+    def send_packet(self, client_socket, packet):
+        """Send a packet to a client"""
+        try:
+            # Serialize the packet
+            data = packet.serialize()
+            # Send the data
+            client_socket.send(data)
+            return True
+        except Exception as e:
+            print(f"Error sending packet: {e}")
+            return False
+            
+    def receive_packet(self, client_socket):
+        """Receive a packet from a client"""
+        try:
+            # Receive data
+            data = client_socket.recv(4096)
+            if not data:
+                return None
+                
+            # Deserialize the packet
+            packet_dict = pickle.loads(data)
+            # Create a new packet from the dictionary
+            packet = Packet(
+                client=packet_dict.get('client', ''),
+                type=packet_dict.get('type'),
+                category=packet_dict.get('category'),
+                command=packet_dict.get('command', '')
+            )
+            return packet
+        except Exception as e:
+            print(f"Error receiving packet: {e}")
+            return None

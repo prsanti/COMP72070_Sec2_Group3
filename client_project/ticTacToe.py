@@ -1,5 +1,6 @@
 import tkinter as tk
 from tkinter import ttk, messagebox
+import random
 
 class TicTacToe(ttk.Frame):
     def __init__(self, parent, main_menu_callback, is_multiplayer=False, tcp_client=None):
@@ -138,9 +139,6 @@ class TicTacToe(ttk.Frame):
 
     def check_winner(self):
         win_conditions = [
-            [0, 1, 2], [3, 4, 5], [6, 7, 8],  # Rows
-            [0, 3, 6], [1, 4, 7], [2, 5, 8],  # Columns
-            [0, 4, 8], [2, 4, 6]  # Diagonals
             [0, 1, 2], [3, 4, 5], [6, 7, 8],  # Rows
             [0, 3, 6], [1, 4, 7], [2, 5, 8],  # Columns
             [0, 4, 8], [2, 4, 6]  # Diagonals
