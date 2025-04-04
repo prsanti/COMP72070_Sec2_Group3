@@ -33,7 +33,7 @@ class GameSelection(ttk.Frame):
             button_frame,
             text="Tic Tac Toe",
             style="Game.TButton",
-            command=self.show_game_mode_menu
+            command=self.tic_tac_toe_callback
         )
         tic_tac_toe_btn.pack(pady=10)
         
@@ -42,7 +42,7 @@ class GameSelection(ttk.Frame):
             button_frame,
             text="Rock Paper Scissors",
             style="Game.TButton",
-            command=self.show_rps_mode_menu
+            command=self.start_rps
         )
         rps_btn.pack(pady=10)
         
@@ -68,12 +68,19 @@ class GameSelection(ttk.Frame):
         back_btn = ttk.Button(self, text="Back to Main Menu", command=self.main_menu_callback)
         back_btn.pack(pady=20)
 
-    def show_game_mode_menu(self):
+    def start_rps(self):
         self.destroy()
-        mode_menu = GameModeMenu(self.parent, self.tcp_client, self.main_menu_callback)
-        mode_menu.pack(expand=True, fill='both')
+        game = RockPaperScissors(self.parent, self.show_game_selection)
+        game.pack(expand=True, fill='both')
 
-    def show_rps_mode_menu(self):
+    def show_game_selection(self):
         self.destroy()
-        mode_menu = GameModeMenu(self.parent, self.tcp_client, self.main_menu_callback, game_type="rps")
-        mode_menu.pack(expand=True, fill='both')
+        self.game_selection = GameSelection(
+            self.parent,
+            self.tcp_client,
+            self.main_menu_callback,
+            self.tic_tac_toe_callback,
+            self.wordle_callback,
+            self.coin_flip_callback
+        )
+        self.game_selection.pack(expand=True, fill="both")
