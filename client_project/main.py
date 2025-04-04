@@ -6,14 +6,12 @@ import time
 import queue
 from queue_1 import SingletonQueue
 
-from loginForm import loginPage
-from game_selection import GameSelection
 from ticTacToe import TicTacToe
 from coinFlip import CoinFlip
 from wordleGame import WordleGame
-from rps import RockPaperScissors
 from gameModeMenu import GameModeMenu
-from connection.client_tcp import TCPClient
+from game_selection import GameSelection
+
 
 # import TCP module from connection package
 import socket
@@ -67,10 +65,27 @@ class MainApplication(tk.Tk):
         )
         self.game_selection.pack(expand=True, fill="both")
 
+    def clear_window(self):
+        # Destroy all widgets in the window
+        for widget in self.winfo_children():
+            widget.destroy()
+            widget.pack_forget()  # Ensure the widget is removed from the packing manager
+
+    def show_game_selection(self):
+        self.clear_window()
+        self.game_selection = GameSelection(
+            self,
+            self.tcp_client,
+            self.show_login_page,
+            self.start_tic_tac_toe,
+            self.start_wordle,
+            self.start_coin_flip
+        )
+        self.game_selection.pack(expand=True, fill="both")
+
     def start_tic_tac_toe(self):
         self.clear_window()
-        game = TicTacToe(self, self.show_game_selection)
-        game.pack(expand=True, fill="both")
+        game = TicTacToe(self, self.show_game_selection, self.tcp_client)
 
     def start_wordle(self):
         self.clear_window()
