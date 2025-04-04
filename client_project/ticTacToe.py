@@ -3,13 +3,8 @@ from tkinter import ttk, messagebox
 import random
 
 class TicTacToe(ttk.Frame):
-
+    #def __init__(self, parent, tcp_client, main_menu_callback):
     def __init__(self, parent, main_menu_callback, is_multiplayer=False, tcp_client=None):
-
-    def __init__(self, parent, tcp_client, main_menu_callback):
-
-    def __init__(self, parent, main_menu_callback, is_multiplayer=False, tcp_client=None):
-
         super().__init__(parent)
         self.parent = parent
         self.tcp_client = tcp_client
