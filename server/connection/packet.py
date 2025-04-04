@@ -4,6 +4,7 @@ from .types import Type, Category
 
 class TestPacket(unittest.TestCase):
     def setUp(self):
+        print("Running Packet Unit Tests")
         # arrange
         self.test_packet = Packet(
             client="test_client",

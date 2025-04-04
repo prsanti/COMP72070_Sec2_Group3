@@ -10,6 +10,7 @@ import sqlite3
 import argparse
 import unittest
 from connection.packet import TestPacket
+from connection.tcp import TestServer as TestTCP
 
 # import utils for helper functions
 import utils
@@ -91,9 +92,14 @@ def start_tcp_server():
 
 
 if __name__ == '__main__':
-    # uncomment to run tests
-    # print("Running tests...")
-    # unittest.main(verbosity=2)
+    # Create a test suite for classes
+    # suite = unittest.TestSuite()
+    # suite.addTests(unittest.TestLoader().loadTestsFromTestCase(TestPacket))
+    # suite.addTests(unittest.TestLoader().loadTestsFromTestCase(TestTCP))
+    
+    # # Run tests
+    # print("Running all tests...")
+    # unittest.TextTestRunner(verbosity=2).run(suite)
     
     # Server code - comment out to run tests
     print("Setting up the database...")

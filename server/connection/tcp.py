@@ -10,6 +10,7 @@ PORT = 27000
 
 class TestServer(unittest.TestCase):
     def setUp(self):
+        print("Running TCP Server Unit Tests")
         # Create a test server instance
         # arrage
         self.server = TCP()
@@ -18,9 +19,10 @@ class TestServer(unittest.TestCase):
         # assert
         self.assertEqual(self.server.state, State.WAITINGFORCONNECTION)
 
+    # must connect client to server
     def test_server_off(self):
         # self.server.host
-        #act
+        # act
         self.server.close()
         # check if clients list is empty
         # assert
@@ -36,7 +38,13 @@ class TestServer(unittest.TestCase):
         
     def test_server_state_waiting_command(self):
         # assert
-        self.assertEqual(self.server.state, State.CONNECTED)
+        self.assertEqual(self.server.state, State.WAITINGFORCONNECTION)
+
+    def test_server_show_clients(self):
+        # act
+        # must connect a client to server for test to pass
+        # assert
+        self.assertEqual(len(self.server.clients), 1)
         
     # def test_server_bind(self):
     #     # Test if server can bind to port
@@ -75,6 +83,10 @@ class TestServer(unittest.TestCase):
     #     finally:
     #         self.server.socket.close()
 
+# run unit tests when main is called
+if __name__ == '__main__':
+    unittest.main()
+    
 class TCP:
     def __init__(self):
         print("TCP Constructor")
