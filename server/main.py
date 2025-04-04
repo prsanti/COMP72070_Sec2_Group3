@@ -155,7 +155,8 @@ if __name__ == '__main__':
         from gui import server_ui  # 🛠 Import after database setup
         print("Initial data loaded successfully.")
 
-        ui.run(reload=False)  # Runs UI in main thread
+        # Use a different port for NiceGUI to avoid conflicts
+        ui.run(reload=False, port=8081)  # Changed port from default 8080 to 8081
         while True:
             time.sleep(1)  # Keep the script alive
     except KeyboardInterrupt:
