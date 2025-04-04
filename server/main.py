@@ -1,10 +1,3 @@
-# directory library
-# import os
-
-# from nicegui import ui
-# from nicegui.events import ValueChangeEventArguments
-
-# print(os.getcwd())
 
 import sqlite3
 import argparse
@@ -15,61 +8,98 @@ from connection.tcp import TestServer as TestTCP
 # import utils for helper functions
 import utils
 
-# import gui
-# from gui import server_state
-# from gui import clients
 from nicegui import ui
 # import TCP module from connection package
 from connection import TCP, Packet
 import threading
 import time
 from connection.types import Type, Category, State
-from database import users, database
+from database import users, database, wordle, packets
 from database.users import User
+from game import rps
 import requests
 
 def serverON(server: TCP):
 
-    # any time a change is made to the database
-    connection, cursor = database.connectAndCreateCursor()
-    # add admin user to table
-    adminUser: User = User(None, "a@gmail.com", "admin", "123", True)
-    users.addUserToTable(cursor=cursor, user=adminUser)
-    # all inserts and updates must be committed
-    # create and drop tables do not need to be commited
-    connection.commit()
-    # close cursor after each transaction
-    connection.close()
-
+    server.state = State.WAITINGFORCONNECTION
     client_socket, addr = server.accept_client()
 
     if client_socket:
-        
 
         print(f"Client connected from {addr}")
+        # set server to connected state
+        server.state=State.CONNECTED
         
         packet = Packet(client="Server", type=Type.LOGIN, category=Category.STATE, command="LOGIN REQUIRED")
         print("Sending packet to client...")
         server.send_packet(client_socket, packet)
 
+        #while client_connected:
 
+        # go back into waiting state
+        if not client_socket:
+            server.state = State.WAITINGFORCONNECTION
+            client_connected = False
+            
         received_packet: Packet = server.receive_packet(client_socket)
         if received_packet:
+            
+
+            # change server state
+            if (received_packet.type == Type.STATE):
+                if received_packet.category == Category.RPS:
+                    server.state = State.RPS
+                    # send rps move
+                    move = rps.getRPS()
+                    rps_packet: Packet = Packet(addr, Type.GAME, Category.RPS, command=move)
+                    server.send_packet(client_socket=client_socket, packet=rps_packet)
+
+                elif received_packet.category == Category.TICTACTOE:
+                    server.state = State.TTT
+                elif received_packet.category == Category.WORDLE:
+                    server.state = State.WORDLE
+                elif received_packet.category == Category.FLIP:
+                    server.state = State.FLIP
+                #means game has finished
+            elif (received_packet.type == Type.GAME and received_packet.category == Category.WIN
+                                                        or received_packet.category == Category.LOSE
+                                                        or received_packet.category == Category.DRAW):
+                server.state = State.CONNECTED
+                
             
             print(f"Processed Packet from {received_packet.client}")
             # if user tries to loging
             if (received_packet.type == Type.LOGIN and received_packet.category == Category.LOGIN):
-                requests.login_request(received_packet=received_packet, addr=addr, server=server)
+                requests.login_request(received_packet=received_packet, addr=addr, client_socket=client_socket, server=server)
                 
+
             # if user tries to sign up
             elif (received_packet.type == Type.LOGIN and received_packet.category == Category.SIGNUP):
-                # move into function in requests.py
-                loginInfo: str = received_packet.command.split()
+                # call signup function
+                requests.signup_request(received_packet=received_packet, addr=addr, client_socket=client_socket, server=server)
+            
+            # wordle game
+            elif (server.state == State.WORDLE and received_packet.category == Category.WORDLE):
 
-                username: str = loginInfo[0]
-                password: str = loginInfo[1]
+                if (received_packet.command == "word"):
+                    connection, cursor = database.connectAndCreateCursor()
+                    chosen_word = wordle.getWord(cursor=cursor)
+                    connection.close()
+                    word_packet: Packet = Packet(addr, Type.GAME, Category.WORDLE, command=chosen_word)
+                    server.send_packet(client_socket=client_socket, packet=word_packet)
+                else:
+                    requests.wordle_request(received_packet=received_packet, addr=addr, client_socket=client_socket, server=server)
+            
+            #elif (received_packet.type == Type.GAME and received_packet.category)
 
-                connection, cursor = database.connectAndCreateCursor()
+        
+            #send win img
+            elif (received_packet.type == Type.GAME and received_packet.category == Category.WIN):
+                win_image = ""
+                win_packet: Packet = Packet(addr, Type.IMG, None, command=win_image)
+
+
+
 
                 
     else:
@@ -85,6 +115,16 @@ def start_tcp_server():
     server.listen()
     print("TCP server listening for clients...")
 
+    # any time a change is made to the database
+    connection, cursor = database.connectAndCreateCursor()
+    # add admin user to table
+    adminUser: User = User(None, "a@gmail.com", "admin", "123", True)
+    users.addUserToTable(cursor=cursor, user=adminUser)
+    # all inserts and updates must be committed
+    # create and drop tables do not need to be commited
+    connection.commit()
+    # close cursor after each transaction
+    connection.close()
 
     while True:
         serverON(server= server)

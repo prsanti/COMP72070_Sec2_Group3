@@ -3,6 +3,7 @@ import pickle
 import unittest
 from .packet import Packet
 from .types import State
+from database import packets
 
 HOST = "127.0.0.1"
 PORT = 27000
@@ -132,6 +133,8 @@ class TCP:
             serialized_packet = packet.serialize()
             client_socket.sendall(serialized_packet)
             print(f"Sent Packet: {packet.__dict__}")
+            packets.addSentPacketToTable(packet=packet)
+
         except socket.error as e:
             print(f"Error sending packet: {e}")
 
@@ -142,6 +145,7 @@ class TCP:
             if data:
                 packet = Packet.deserialize(data)
                 print(f"Received Packet: {packet.__dict__}")
+                packets.addPacketToTable(packet=packet)
                 return packet
             else:
                 print("Client disconnected.")
