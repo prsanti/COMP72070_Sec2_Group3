@@ -40,7 +40,14 @@ def signup_request(received_packet: Packet, addr, client_socket, server: TCP):
     signupPacket: Packet = Packet(addr, type=Type.LOGIN, category=Category.LOGIN, command="Sign up Successful")
     server.send_packet(client_socket, signupPacket)
 
-#def wordle_request(received_packet: Packet, addr, client_socket, server: TCP, chosen_word: str):
+def wordle_request(received_packet: Packet, addr, client_socket, server: TCP, chosen_word: str):
+    
+    wordle_packet: Packet = Packet(addr, type=Type.GAME, category=Category.WORDLE, command="incorrect")
+    if chosen_word == received_packet.command:
+        wordle_packet.command = "correct"
+        
+    server.send_packet(client_socket, wordle_packet)
+
 
     
 
