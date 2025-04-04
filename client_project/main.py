@@ -34,8 +34,8 @@ class MainApplication(tk.Tk):
         self.configure(bg="#2E3440")
         
         # Initialize TCP client
-        self.tcp_client = TCPClient()
-        self.tcp_client.connect("127.0.0.1", 65432)
+        #self.tcp_client = TCPClient()
+        #self.tcp_client.connect("127.0.0.1", 65432)
         
         # Show login page first
         self.show_login_page()
