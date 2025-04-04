@@ -19,4 +19,5 @@ class Category(Enum):
   DRAW = 7
   LOGIN = 8
   SIGNUP = 9
+  FLIP = 10
   
