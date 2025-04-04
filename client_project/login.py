@@ -32,6 +32,8 @@ class LoginPage(tk.Frame):
     def login(self):
         from main import connection_queue
         from main import client_queue
+
+
         username = self.username_entry.get()
         password = self.password_entry.get()
 
@@ -58,10 +60,11 @@ class LoginPage(tk.Frame):
 
         if (response.command == True or response.command == "True"):
             print("login successful")
+            login = False
             self.on_login_success(True)
         else:
             messagebox.showerror("Error", "Login failed")
-            self.tcp_client.close()
+        
 
 
     def continue_offline(self):
