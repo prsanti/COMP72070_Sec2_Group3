@@ -20,7 +20,7 @@ from connection import TCP, Packet
 import threading
 import time
 from connection.types import Type, Category
-from database import users, database
+from database import users, database, wordle
 from database.users import User
 import requests
 
@@ -56,17 +56,25 @@ def serverON(server: TCP):
             print(f"Processed Packet from {received_packet.client}")
             # if user tries to loging
             if (received_packet.type == Type.LOGIN and received_packet.category == Category.LOGIN):
-                requests.login_request(received_packet=received_packet, addr=addr, server=server)
-                
+                requests.login_request(received_packet=received_packet, addr=addr, client_socket=client_socket, server=server)
+ 
             # if user tries to sign up
             elif (received_packet.type == Type.LOGIN and received_packet.category == Category.SIGNUP):
                 # move into function in requests.py
-                loginInfo: str = received_packet.command.split()
+                requests.signup_request(received_packet=received_packet, addr=addr, client_socket=client_socket, server=server)
+            
+            # wordle game
+            elif (received_packet.type == Type.GAME and received_packet.category == Category.WORDLE):
 
-                username: str = loginInfo[0]
-                password: str = loginInfo[1]
+                if (received_packet.command == "word"):
+                    connection, cursor = database.connectAndCreateCursor()
+                    chosen_word = wordle.getWord(cursor=cursor)
+                    connection.close()
+                    word_packet: Packet = Packet(addr, Type.GAME, Category.WORDLE, command=chosen_word)
+                    server.send_packet(client_socket=client_socket, packet=word_packet)
+                else:
+                    requests.wordle_request(received_packet=received_packet, addr=addr, client_socket=client_socket, server=server)
 
-                connection, cursor = database.connectAndCreateCursor()
 
                 
     else:

@@ -44,20 +44,25 @@ class LoginPage(tk.Frame):
         
 
         try:
-            connection_queue.put(login_packet, block=False)  # Try adding without blocking
+            connection_queue.put(login_packet, block=False)
             print("Login packet added to the queue")
         except connection_queue.Full:
             print("Queue is full, cannot add packet")
 
         time.sleep(5)
+        # login required packet
+        response: Packet = client_queue.get()
+        # login confirm packet
+        response: Packet = client_queue.get()
+        print(client_queue.qsize())
+        print(response.command)
 
-        # response: Packet = client_queue.get()
-
-        # if (response.command == "True" | "1"):
-        #     self.on_login_success(self.tcp_client)
-        # else:
-        #     messagebox.showerror("Error", "Login failed")
-        #     self.tcp_client.close()
+        if (response.command == True or response.command == "True"):
+            print("login successful")
+            self.on_login_success(True)
+        else:
+            messagebox.showerror("Error", "Login failed")
+            self.tcp_client.close()
 
 
     def continue_offline(self):
