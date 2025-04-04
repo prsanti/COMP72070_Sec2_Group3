@@ -56,7 +56,6 @@ class TCP:
                 return packet
             else:
                 print("Client disconnected.")
-                self.clients.remove(client_socket)
                 client_socket.close()
         except BlockingIOError:
             return None
@@ -65,7 +64,5 @@ class TCP:
 
     def close(self):
         """Close all client connections and the server socket."""
-        for client in self.clients:
-            client.close()
         self.server_socket.close()
-        print("Server closed.")
+        print("connection closed.")

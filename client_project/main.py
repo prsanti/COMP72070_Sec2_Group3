@@ -182,6 +182,7 @@ def handle_socket_connection():
                 buffer = client.receive_packet(s)
                 if buffer:
                     print(f"Received packet from server: {buffer.client}, Command: {buffer.command}")
+                    client_queue.put(buffer, block=False)
                     # check type and category from buffer packet
                     
             except BlockingIOError:
