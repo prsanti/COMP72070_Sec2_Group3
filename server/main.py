@@ -17,10 +17,10 @@ import requests
 
 def serverON(server: TCP):
 
+    server.state = State.WAITINGFORCONNECTION
     client_socket, addr = server.accept_client()
 
     if client_socket:
-        client_connected = True
 
         print(f"Client connected from {addr}")
         # set server to connected state
@@ -30,69 +30,69 @@ def serverON(server: TCP):
         print("Sending packet to client...")
         server.send_packet(client_socket, packet)
 
-        while client_connected:
+        #while client_connected:
 
-            # go back into waiting state
-            if not client_socket:
-                server.state = State.WAITINGFORCONNECTION
-                client_connected = False
-                
-            received_packet: Packet = server.receive_packet(client_socket)
-            if received_packet:
-                
-
-                # change server state
-                if (received_packet.type == Type.STATE):
-                    if received_packet.category == Category.RPS:
-                        server.state = State.RPS
-                        # send rps move
-                        move = rps.getRPS()
-                        rps_packet: Packet = Packet(addr, Type.GAME, Category.RPS, command=move)
-                        server.send_packet(client_socket=client_socket, packet=rps_packet)
-
-                    elif received_packet.category == Category.TICTACTOE:
-                        server.state = State.TTT
-                    elif received_packet.category == Category.WORDLE:
-                        server.state = State.WORDLE
-                    elif received_packet.category == Category.FLIP:
-                        server.state = State.FLIP
-                    #means game has finished
-                elif (received_packet.type == Type.GAME and received_packet.category == Category.WIN
-                                                            or received_packet.category == Category.LOSE
-                                                            or received_packet.category == Category.DRAW):
-                    server.state = State.CONNECTED
-                    
-                
-                print(f"Processed Packet from {received_packet.client}")
-                # if user tries to loging
-                if (received_packet.type == Type.LOGIN and received_packet.category == Category.LOGIN):
-                    requests.login_request(received_packet=received_packet, addr=addr, client_socket=client_socket, server=server)
-                    
-    
-                # if user tries to sign up
-                elif (received_packet.type == Type.LOGIN and received_packet.category == Category.SIGNUP):
-                    # call signup function
-                    requests.signup_request(received_packet=received_packet, addr=addr, client_socket=client_socket, server=server)
-                
-                # wordle game
-                elif (server.state == State.WORDLE and received_packet.category == Category.WORDLE):
-
-                    if (received_packet.command == "word"):
-                        connection, cursor = database.connectAndCreateCursor()
-                        chosen_word = wordle.getWord(cursor=cursor)
-                        connection.close()
-                        word_packet: Packet = Packet(addr, Type.GAME, Category.WORDLE, command=chosen_word)
-                        server.send_packet(client_socket=client_socket, packet=word_packet)
-                    else:
-                        requests.wordle_request(received_packet=received_packet, addr=addr, client_socket=client_socket, server=server)
-                
-                #elif (received_packet.type == Type.GAME and received_packet.category)
-
+        # go back into waiting state
+        if not client_socket:
+            server.state = State.WAITINGFORCONNECTION
+            client_connected = False
             
-                #send win img
-                elif (received_packet.type == Type.GAME and received_packet.category == Category.WIN):
-                    win_image = ""
-                    win_packet: Packet = Packet(addr, Type.IMG, None, command=win_image)
+        received_packet: Packet = server.receive_packet(client_socket)
+        if received_packet:
+            
+
+            # change server state
+            if (received_packet.type == Type.STATE):
+                if received_packet.category == Category.RPS:
+                    server.state = State.RPS
+                    # send rps move
+                    move = rps.getRPS()
+                    rps_packet: Packet = Packet(addr, Type.GAME, Category.RPS, command=move)
+                    server.send_packet(client_socket=client_socket, packet=rps_packet)
+
+                elif received_packet.category == Category.TICTACTOE:
+                    server.state = State.TTT
+                elif received_packet.category == Category.WORDLE:
+                    server.state = State.WORDLE
+                elif received_packet.category == Category.FLIP:
+                    server.state = State.FLIP
+                #means game has finished
+            elif (received_packet.type == Type.GAME and received_packet.category == Category.WIN
+                                                        or received_packet.category == Category.LOSE
+                                                        or received_packet.category == Category.DRAW):
+                server.state = State.CONNECTED
+                
+            
+            print(f"Processed Packet from {received_packet.client}")
+            # if user tries to loging
+            if (received_packet.type == Type.LOGIN and received_packet.category == Category.LOGIN):
+                requests.login_request(received_packet=received_packet, addr=addr, client_socket=client_socket, server=server)
+                
+
+            # if user tries to sign up
+            elif (received_packet.type == Type.LOGIN and received_packet.category == Category.SIGNUP):
+                # call signup function
+                requests.signup_request(received_packet=received_packet, addr=addr, client_socket=client_socket, server=server)
+            
+            # wordle game
+            elif (server.state == State.WORDLE and received_packet.category == Category.WORDLE):
+
+                if (received_packet.command == "word"):
+                    connection, cursor = database.connectAndCreateCursor()
+                    chosen_word = wordle.getWord(cursor=cursor)
+                    connection.close()
+                    word_packet: Packet = Packet(addr, Type.GAME, Category.WORDLE, command=chosen_word)
+                    server.send_packet(client_socket=client_socket, packet=word_packet)
+                else:
+                    requests.wordle_request(received_packet=received_packet, addr=addr, client_socket=client_socket, server=server)
+            
+            #elif (received_packet.type == Type.GAME and received_packet.category)
+
+        
+            #send win img
+            elif (received_packet.type == Type.GAME and received_packet.category == Category.WIN):
+                win_image = ""
+                win_packet: Packet = Packet(addr, Type.IMG, None, command=win_image)
 
 
 
