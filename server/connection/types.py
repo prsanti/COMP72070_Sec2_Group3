@@ -19,12 +19,15 @@ class Category(Enum):
   DRAW = 7
   LOGIN = 8
   SIGNUP = 9
+  FLIP = 10
   
 class State(Enum):
 
   WAITINGFORCONNECTION = 1
   CONNECTED = 2
   GAME = 3
-  WAITINGFORPLAYER2 = 4
-  CLIENT1 = 5
-  CLIENT2 = 6
+  RPS = 4
+  WORDLE = 5
+  FLIP = 6
+  TTT = 7
+

@@ -56,7 +56,6 @@ class TCP:
                 return packet
             else:
                 print("Client disconnected.")
-                self.clients.remove(client_socket)
                 client_socket.close()
         except BlockingIOError:
             return None

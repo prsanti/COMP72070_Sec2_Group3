@@ -2,7 +2,7 @@ import sqlite3
 import pathlib
 from .wordle import createWordleTable
 from .users import createUserTable
-from .packets import createPacketTable
+from .packets import createPacketTable, creatSentPacketTable
 from .chatLogs import createChatTable
 
 dbPath = "serverData"
@@ -13,11 +13,13 @@ def setup_database():
     connection = sqlite3.connect(dbPath)
     cursor = connection.cursor()
     cursor.execute("PRAGMA journal_mode=WAL;")  # Enables write-ahead logging
-    dropTable(cursor=cursor, table="users")
+    dropTable(cursor=cursor, table="packets")
+    dropTable(cursor=cursor, table="SentPackets")
     createWordleTable(cursor=cursor)
     createUserTable(cursor=cursor)
     createChatTable(cursor=cursor)
     createPacketTable(cursor=cursor)
+    creatSentPacketTable(cursor=cursor)
 
     connection.commit()
     connection.close()
