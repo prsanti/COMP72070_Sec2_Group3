@@ -33,7 +33,7 @@ class GameSelection(ttk.Frame):
             button_frame,
             text="Tic Tac Toe",
             style="Game.TButton",
-            command=self.show_game_mode_menu
+            command=self.tic_tac_toe_callback
         )
         tic_tac_toe_btn.pack(pady=10)
         

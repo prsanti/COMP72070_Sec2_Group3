@@ -101,7 +101,6 @@ class MainApplication(tk.Tk):
         self.clear_window()
         mode_menu = GameModeMenu(
             self,
-            self.tcp_client,
             self.create_main_menu,  # Pass the method directly
             game_type=game_type
         )
@@ -114,7 +113,7 @@ class MainApplication(tk.Tk):
 
     def start_coin_flip(self):
         self.clear_window()
-        game = CoinFlip(self, self.create_main_menu)
+        game = CoinFlip(self, self.create_main_menu, self.tcp_client)
         game.pack(expand=True, fill="both")
 
 

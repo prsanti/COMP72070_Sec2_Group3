@@ -1,6 +1,7 @@
-from tkinter import ttk
+from tkinter import ttk, messagebox
 from PIL import ImageTk, Image
 import random
+import os
 
 class CoinFlip(ttk.Frame):
     def __init__(self, parent, main_menu_callback, tcp_client=None):
@@ -9,9 +10,17 @@ class CoinFlip(ttk.Frame):
         self.tcp_client = tcp_client
         self.main_menu_callback = main_menu_callback
 
-        # Load images
-        self.heads_img = ImageTk.PhotoImage(Image.open("assets/heads.png").resize((200, 200)))
-        self.tails_img = ImageTk.PhotoImage(Image.open("assets/tails.png").resize((200, 200)))
+        # Load images with error handling
+        try:
+            assets_dir = os.path.join(os.path.dirname(__file__), "assets")
+            self.heads_img = ImageTk.PhotoImage(Image.open(os.path.join(assets_dir, "heads.png")).resize((200, 200)))
+            self.tails_img = ImageTk.PhotoImage(Image.open(os.path.join(assets_dir, "tails.png")).resize((200, 200)))
+        except Exception as e:
+            print(f"Error loading coin images: {e}")
+            # Create default images (colored rectangles)
+            img = Image.new('RGB', (200, 200), color='gold')
+            self.heads_img = ImageTk.PhotoImage(img)
+            self.tails_img = ImageTk.PhotoImage(img)
 
         # Initialize counters
         self.total_flips = 0
