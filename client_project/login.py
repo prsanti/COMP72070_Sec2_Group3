@@ -60,7 +60,6 @@ class LoginPage(tk.Frame):
 
         if (response.command == True or response.command == "True"):
             print("login successful")
-            login = False
             self.on_login_success(True)
         else:
             messagebox.showerror("Error", "Login failed")
