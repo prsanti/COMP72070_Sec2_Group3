@@ -18,6 +18,9 @@ from database import users, database, wordle, packets
 from database.users import User
 from game import rps
 import requests
+import random
+
+wordle_word = ""
 
 def serverON(server: TCP):
 
@@ -60,6 +63,9 @@ def serverON(server: TCP):
                     server.state = State.WORDLE
                 elif received_packet.category == Category.FLIP:
                     server.state = State.FLIP
+                    coin = random.choice(["heads", "tails"])
+                    flip_coin_packet: Packet = Packet(addr, Type.GAME, Category.FLIP, command=coin)
+                    server.send_packet(client_socket=client_socket, packet=flip_coin_packet)
                 #means game has finished
             elif (received_packet.type == Type.GAME and received_packet.category == Category.WIN
                                                         or received_packet.category == Category.LOSE
@@ -80,13 +86,14 @@ def serverON(server: TCP):
             
             # wordle game
             elif (server.state == State.WORDLE and received_packet.category == Category.WORDLE):
-
+                # send word from database to client
                 if (received_packet.command == "word"):
                     connection, cursor = database.connectAndCreateCursor()
-                    chosen_word = wordle.getWord(cursor=cursor)
+                    wordle_word [:] = wordle.getWord(cursor=cursor)
                     connection.close()
-                    word_packet: Packet = Packet(addr, Type.GAME, Category.WORDLE, command=chosen_word)
+                    word_packet: Packet = Packet(addr, Type.GAME, Category.WORDLE, command=wordle_word)
                     server.send_packet(client_socket=client_socket, packet=word_packet)
+                #compare word and send result
                 else:
                     requests.wordle_request(received_packet=received_packet, addr=addr, client_socket=client_socket, server=server)
             
@@ -97,6 +104,7 @@ def serverON(server: TCP):
             elif (received_packet.type == Type.GAME and received_packet.category == Category.WIN):
                 win_image = ""
                 win_packet: Packet = Packet(addr, Type.IMG, None, command=win_image)
+                server.send_packet(addr, win_packet)
 
 
 
