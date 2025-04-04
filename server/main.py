@@ -7,6 +7,9 @@
 # print(os.getcwd())
 
 import sqlite3
+import argparse
+import unittest
+from connection.packet import TestPacket
 
 # import utils for helper functions
 import utils
@@ -19,7 +22,7 @@ from nicegui import ui
 from connection import TCP, Packet
 import threading
 import time
-from connection.types import Type, Category
+from connection.types import Type, Category, State
 from database import users, database
 from database.users import User
 import requests
@@ -88,6 +91,11 @@ def start_tcp_server():
 
 
 if __name__ == '__main__':
+    # uncomment to run tests
+    # print("Running tests...")
+    # unittest.main(verbosity=2)
+    
+    # Server code - comment out to run tests
     print("Setting up the database...")
     database.setup_database()  # 🛠 Ensure tables are created
     print("Database setup complete.")

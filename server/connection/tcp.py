@@ -1,10 +1,79 @@
 import socket
 import pickle
+import unittest
 from .packet import Packet
 from .types import State
 
 HOST = "127.0.0.1"
 PORT = 27000
+
+
+class TestServer(unittest.TestCase):
+    def setUp(self):
+        # Create a test server instance
+        # arrage
+        self.server = TCP()
+
+    def test_start_server(self):
+        # assert
+        self.assertEqual(self.server.state, State.WAITINGFORCONNECTION)
+
+    def test_server_off(self):
+        # self.server.host
+        #act
+        self.server.close()
+        # check if clients list is empty
+        # assert
+        self.assertEqual(len(self.server.clients), 0)
+
+    def test_server_state_waiting(self):
+        # assert
+        self.assertEqual(self.server.state, State.WAITINGFORCONNECTION)
+
+    def test_server_state_waiting(self):
+        # assert
+        self.assertEqual(self.server.state, State.WAITINGFORCONNECTION)
+        
+    def test_server_state_waiting_command(self):
+        # assert
+        self.assertEqual(self.server.state, State.CONNECTED)
+        
+    # def test_server_bind(self):
+    #     # Test if server can bind to port
+    #     try:
+    #         #act
+    #         self.server.bind()
+    #         #assert
+    #         self.assertTrue(self.server.socket is not None)
+    #     except Exception as e:
+    #         self.fail(f"Server bind failed: {str(e)}")
+    #     finally:
+    #         self.server.socket.close()
+            
+    # def test_server_listen(self):
+    #     # Test if server can listen for connections
+    #     try:
+    #         self.server.bind()
+    #         self.server.listen()
+    #         self.assertTrue(self.server.socket is not None)
+    #     except Exception as e:
+    #         self.fail(f"Server listen failed: {str(e)}")
+    #     finally:
+    #         self.server.socket.close()
+            
+    # def test_server_accept_client(self):
+    #     # Test if server can accept client connections
+    #     try:
+    #         self.server.bind()
+    #         self.server.listen()
+    #         # Note: This test will timeout waiting for a client
+    #         # In a real test environment, you might want to mock the client connection
+    #         client_socket, addr = self.server.accept_client()
+    #         self.assertIsNone(client_socket)  # Should be None since no client connected
+    #     except Exception as e:
+    #         self.fail(f"Server accept failed: {str(e)}")
+    #     finally:
+    #         self.server.socket.close()
 
 class TCP:
     def __init__(self):
