@@ -1,6 +1,7 @@
 import tkinter as tk
 from tkinter import ttk, messagebox
 import random
+import os
 
 class WordleGame(ttk.Frame):
     def __init__(self, parent, tcp_client, main_menu_callback):
@@ -8,11 +9,23 @@ class WordleGame(ttk.Frame):
         self.parent = parent
         self.tcp_client = tcp_client
         self.main_menu_callback = main_menu_callback
-        self.target_word = random.choice(["APPLE", "BRAIN", "CLOUD", "DREAM", "EARTH"])
+        
+        # Load words from file
+        self.words = self.load_words()
+        self.target_word = random.choice(self.words)
         self.guesses = []
         self.current_row = 0
         self.current_col = 0
         self.create_widgets()
+
+    def load_words(self):
+        """Load words from the words.txt file."""
+        try:
+            with open(os.path.join(os.path.dirname(__file__), "words.txt"), "r") as f:
+                return [word.strip().upper() for word in f.readlines()]
+        except FileNotFoundError:
+            # Fallback words if file not found
+            return ["APPLE", "BRAIN", "CLOUD", "DREAM", "EARTH", "FLAME", "GRASS", "HEART", "IGLOO", "JUICE"]
 
     def create_widgets(self):
         title = ttk.Label(self, text="WORDLE", font=("Arial", 24, "bold",))
