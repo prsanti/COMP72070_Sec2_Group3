@@ -109,7 +109,7 @@ class MainApplication(tk.Tk):
 
     def start_wordle(self):
         self.clear_window()
-        game = WordleGame(self, self.create_main_menu)
+        game = WordleGame(self, self.tcp_client, self.create_main_menu)
         game.pack(expand=True, fill="both")
 
     def start_coin_flip(self):
