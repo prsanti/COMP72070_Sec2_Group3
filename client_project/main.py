@@ -9,15 +9,12 @@ from queue_1 import SingletonQueue
 from ticTacToe import TicTacToe
 from coinFlip import CoinFlip
 from wordleGame import WordleGame
-
-
-# import TCP module from connection package
 import socket
 from connection import Packet
+
 HOST = "127.0.0.1"
 PORT = 27000
 BUFSIZE = 255
-# Shared queue is now guaranteed to be the same for all threads
 connection_queue = SingletonQueue("connection_queue")
 client_queue = SingletonQueue("client_queue")
 
@@ -28,7 +25,7 @@ class MainApplication(tk.Tk):
     def __init__(self):
         super().__init__()
         self.title("Game Suite")
-        self.geometry("800x600")  # Set a fixed window size
+        self.geometry("800x600") 
         self.configure(bg="#2E3440")
         self.show_login_page()
 
@@ -42,10 +39,9 @@ class MainApplication(tk.Tk):
         self.game_selection.pack(expand=True, fill="both")
 
     def clear_window(self):
-        # Destroy all widgets in the window
         for widget in self.winfo_children():
             widget.destroy()
-            widget.pack_forget()  # Ensure the widget is removed from the packing manager
+            widget.pack_forget()
 
     def show_game_selection(self):
         self.clear_window()
@@ -75,13 +71,10 @@ class MainApplication(tk.Tk):
         game.pack(expand=True, fill="both")
 
 
-
-# In the consumer thread handling the queue
 def handle_socket_connection():
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
         s.connect((HOST, PORT))
         client: TCP = TCP()
-
         s.setblocking(False)  # Ensure the socket is non-blocking
 
         while True:
@@ -89,31 +82,27 @@ def handle_socket_connection():
                 buffer = client.receive_packet(s)
                 if buffer:
                     print(f"Received packet from server: {buffer.client}, Command: {buffer.command}")
+                    # Put the received packet into the queue for the main thread to process
                     client_queue.put(buffer, block=False)
-                    # check type and category from buffer packet
-                    
             except BlockingIOError:
                 pass  # No data available, move on
 
-            # Try to get the next packet from the queue with a timeout (e.g., 1 second)
             try:
-                packet = connection_queue.get(timeout=1.0)  # Timeout after 1 second
+
+                packet = connection_queue.get(timeout=1.0) 
                 print(f"Dequeued packet: {packet}")
-                client.send_packet(s, packet=packet)  # Send the packet to the server
+                client.send_packet(s, packet=packet)
                 print(f"Packet sent.")
             except queue.Empty:
                 time.sleep(0.05)
 
-            time.sleep(0.1)  # Optional, helps avoid tight loop busy-waiting
+            time.sleep(0.1)
 
-            
 
 if __name__ == "__main__":
-    # Create a socket and connect to the server
-
     socket_thread = threading.Thread(target=handle_socket_connection)
-    socket_thread.daemon = True  
+    socket_thread.daemon = True
     socket_thread.start()
- 
+
     app = MainApplication()
-    app.mainloop() 
+    app.mainloop()
