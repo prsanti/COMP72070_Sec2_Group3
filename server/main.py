@@ -23,93 +23,81 @@ import random
 wordle_word = ""
 
 def serverON(server: TCP):
-
     server.state = State.WAITINGFORCONNECTION
     client_socket, addr = server.accept_client()
 
     if client_socket:
-
         print(f"Client connected from {addr}")
-        # set server to connected state
-        server.state=State.CONNECTED
+        server.state = State.CONNECTED
         
+        # Send initial "LOGIN REQUIRED" packet
         packet = Packet(client="Server", type=Type.LOGIN, category=Category.STATE, command="LOGIN REQUIRED")
         print("Sending packet to client...")
         server.send_packet(client_socket, packet)
 
-        #while client_connected:
-
-        # go back into waiting state
-        if not client_socket:
-            server.state = State.WAITINGFORCONNECTION
-            client_connected = False
-            
-        received_packet: Packet = server.receive_packet(client_socket)
-        if received_packet:
-            
-
-            # change server state
-            if (received_packet.type == Type.STATE):
-                if received_packet.category == Category.RPS:
-                    server.state = State.RPS
-                    # send rps move
-                    move = rps.getRPS()
-                    rps_packet: Packet = Packet(addr, Type.GAME, Category.RPS, command=move)
-                    server.send_packet(client_socket=client_socket, packet=rps_packet)
-
-                elif received_packet.category == Category.TICTACTOE:
-                    server.state = State.TTT
-                elif received_packet.category == Category.WORDLE:
-                    server.state = State.WORDLE
-                elif received_packet.category == Category.FLIP:
-                    server.state = State.FLIP
-                    coin = random.choice(["heads", "tails"])
-                    flip_coin_packet: Packet = Packet(addr, Type.GAME, Category.FLIP, command=coin)
-                    server.send_packet(client_socket=client_socket, packet=flip_coin_packet)
-                #means game has finished
-            elif (received_packet.type == Type.GAME and received_packet.category == Category.WIN
-                                                        or received_packet.category == Category.LOSE
-                                                        or received_packet.category == Category.DRAW):
-                server.state = State.CONNECTED
+        # Process packets continuously until the client disconnects
+        while True:
+            try:
+                # Receive the next packet from the client
+                received_packet: Packet = server.receive_packet(client_socket)
                 
-            
-            print(f"Processed Packet from {received_packet.client}")
-            # if user tries to loging
-            if (received_packet.type == Type.LOGIN and received_packet.category == Category.LOGIN):
-                requests.login_request(received_packet=received_packet, addr=addr, client_socket=client_socket, server=server)
+                if not received_packet:
+                    print(f"Client {addr} disconnected or sent an empty packet")
+                    break  # If no packet is received, assume client disconnected
                 
+                # Handle packet based on its type and category
+                if received_packet.type == Type.STATE:
+                    if received_packet.category == Category.RPS:
+                        server.state = State.RPS
+                        move = rps.getRPS()
+                        rps_packet: Packet = Packet(addr, Type.GAME, Category.RPS, command=move)
+                        server.send_packet(client_socket=client_socket, packet=rps_packet)
+                    elif received_packet.category == Category.TICTACTOE:
+                        server.state = State.TTT
+                    elif received_packet.category == Category.WORDLE:
+                        server.state = State.WORDLE
+                    elif received_packet.category == Category.FLIP:
+                        server.state = State.FLIP
+                        coin = random.choice(["heads", "tails"])
+                        flip_coin_packet: Packet = Packet(addr, Type.GAME, Category.FLIP, command=coin)
+                        server.send_packet(client_socket=client_socket, packet=flip_coin_packet)
 
-            # if user tries to sign up
-            elif (received_packet.type == Type.LOGIN and received_packet.category == Category.SIGNUP):
-                # call signup function
-                requests.signup_request(received_packet=received_packet, addr=addr, client_socket=client_socket, server=server)
-            
-            # wordle game
-            elif (server.state == State.WORDLE and received_packet.category == Category.WORDLE):
-                # send word from database to client
-                if (received_packet.command == "word"):
-                    connection, cursor = database.connectAndCreateCursor()
-                    wordle_word [:] = wordle.getWord(cursor=cursor)
-                    connection.close()
-                    word_packet: Packet = Packet(addr, Type.GAME, Category.WORDLE, command=wordle_word)
-                    server.send_packet(client_socket=client_socket, packet=word_packet)
-                #compare word and send result
-                else:
-                    requests.wordle_request(received_packet=received_packet, addr=addr, client_socket=client_socket, server=server)
-            
-            #elif (received_packet.type == Type.GAME and received_packet.category)
-
-        
-            #send win img
-            elif (received_packet.type == Type.GAME and received_packet.category == Category.WIN):
-                win_image = ""
-                win_packet: Packet = Packet(addr, Type.IMG, None, command=win_image)
-                server.send_packet(addr, win_packet)
-
-
-
-
+                elif received_packet.type == Type.GAME and received_packet.category in [Category.WIN, Category.LOSE, Category.DRAW]:
+                    server.state = State.CONNECTED
                 
+                elif received_packet.type == Type.LOGIN and received_packet.category == Category.LOGIN:
+                    requests.login_request(received_packet=received_packet, addr=addr, client_socket=client_socket, server=server)
+                
+                elif received_packet.type == Type.LOGIN and received_packet.category == Category.SIGNUP:
+                    requests.signup_request(received_packet=received_packet, addr=addr, client_socket=client_socket, server=server)
+                
+                elif server.state == State.WORDLE and received_packet.category == Category.WORDLE:
+                    if received_packet.command == "word":
+                        connection, cursor = database.connectAndCreateCursor()
+                        wordle_word[:] = wordle.getWord(cursor=cursor)
+                        connection.close()
+                        word_packet: Packet = Packet(addr, Type.GAME, Category.WORDLE, command=wordle_word)
+                        server.send_packet(client_socket=client_socket, packet=word_packet)
+                    else:
+                        requests.wordle_request(received_packet=received_packet, addr=addr, client_socket=client_socket, server=server)
+                
+                # Send win image
+                elif received_packet.type == Type.GAME and received_packet.category == Category.WIN:
+                    win_image = ""  # Placeholder for the actual win image
+                    win_packet: Packet = Packet(addr, Type.IMG, None, command=win_image)
+                    server.send_packet(addr, win_packet)
+                
+                # Optionally add more conditions here for other game categories
+
+                print(f"Processed Packet from {received_packet.client}")
+
+            except Exception as e:
+                print(f"Error while processing packet: {e}")
+                break  # If an error occurs, break out of the loop
+
+        # Close the connection after the loop ends (client disconnected)
+        client_socket.close()
+        print(f"Client {addr} disconnected")
     else:
         print("No client connected, continuing to wait...")
 

@@ -50,19 +50,27 @@ class LoginPage(tk.Frame):
         except connection_queue.Full:
             print("Queue is full, cannot add packet")
 
-        time.sleep(5)
-        # login required packet
+        time.sleep(0.5)
+
+
         response: Packet = client_queue.get()
-        # login confirm packet
-        response: Packet = client_queue.get()
+
+        # make sure it got correct packet type
+        if response.category != Category.LOGIN :
+            response= client_queue.get()
+
         print(client_queue.qsize())
         print(response.command)
 
-        if (response.command == True or response.command == "True"):
+        if (response.command == "True"):
             print("login successful")
             self.on_login_success(True)
         else:
             messagebox.showerror("Error", "Login failed")
+            self.username_entry.delete(0, tk.END) 
+            self.password_entry.delete(0, tk.END) 
+
+            self.username_entry.focus()
         
 
 
