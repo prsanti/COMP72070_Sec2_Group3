@@ -3,11 +3,12 @@ from tkinter import ttk, messagebox
 from connection.packet import Packet, Type, Category
 
 class TicTacToe(ttk.Frame):
-    def __init__(self, parent, main_menu_callback, tcp_client=None):
+    def __init__(self, parent, tcp_client, main_menu_callback):
         super().__init__(parent)
         self.parent = parent
-        self.main_menu_callback = main_menu_callback
         self.tcp_client = tcp_client
+        self.main_menu_callback = main_menu_callback
+       
         self.current_player = "X"
         self.board = [""] * 9
 
@@ -21,12 +22,6 @@ class TicTacToe(ttk.Frame):
 
         self.create_widgets()
 
-    def return_to_menu(self):
-        for widget in self.winfo_children():
-            widget.destroy()
-        self.destroy()
-        self.main_menu_callback()
-
     def create_widgets(self):
         self.grid_frame = ttk.Frame(self)
         self.grid_frame.pack(expand=True, pady=20)
@@ -38,7 +33,7 @@ class TicTacToe(ttk.Frame):
             btn.grid(row=i // 3, column=i % 3, padx=5, pady=5)
             self.buttons.append(btn)
 
-        back_btn = ttk.Button(self, text="Back to Main Menu", command=self.return_to_menu)
+        back_btn = ttk.Button(self, text="Main Menu", command=self.main_menu_callback)
         back_btn.pack(pady=20)
 
     def make_move(self, idx):

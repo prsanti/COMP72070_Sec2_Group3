@@ -1,5 +1,6 @@
 import sqlite3
 import random
+import os
 
 def createWordleTable(cursor: sqlite3.Cursor):
 
@@ -22,7 +23,9 @@ def createWordleTable(cursor: sqlite3.Cursor):
     cursor.connection.commit()
 
 def readWordsFromFile(filename):
-    with open(filename, 'r') as file:
+    server_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    file_path = os.path.join(server_dir, filename)
+    with open(file_path, 'r') as file:
         return file.readlines()
     
 def insertWords(cursor: sqlite3.Cursor, words):

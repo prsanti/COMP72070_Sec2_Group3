@@ -44,16 +44,15 @@ class MainApplication(tk.Tk):
             widget.pack_forget()
 
     def show_game_selection(self):
-        self.clear_window()
-        self.game_selection = GameSelection(
-            self,
-            self.tcp_client,
-            self.show_login_page,
-            self.start_tic_tac_toe,
-            self.start_wordle,
-            self.start_coin_flip
-        )
-        self.game_selection.pack(expand=True, fill="both")
+        # Clear any existing game frames
+        for widget in self.winfo_children():
+            if isinstance(widget, (TicTacToe, WordleGame, CoinFlip)):
+                widget.destroy()
+        
+        # Show the game selection screen
+        if hasattr(self, 'game_selection'):
+            self.game_selection.pack(expand=True, fill="both")
+            self.game_selection.lift()
 
     def start_tic_tac_toe(self):
         self.clear_window()

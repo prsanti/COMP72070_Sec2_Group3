@@ -61,6 +61,8 @@ class GameSelection(tk.Frame):
         # Destroy the current game frame if it exists
         if self.current_game:
             self.current_game.destroy()
+            self.current_game = None
 
         # Show the game selection screen
         self.pack(expand=True, fill="both")
+        self.lift()  # Bring the game selection screen to the front
