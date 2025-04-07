@@ -1,6 +1,6 @@
 import tkinter as tk
 from tkinter import ttk, messagebox
-import random
+from connection.packet import Packet, Type, Category
 
 class TicTacToe(ttk.Frame):
     def __init__(self, parent, main_menu_callback, tcp_client=None):
@@ -11,88 +11,97 @@ class TicTacToe(ttk.Frame):
         self.current_player = "X"
         self.board = [""] * 9
 
-        # Define custom styles for the buttons
         self.style = ttk.Style()
         self.style.configure("Blue.TButton", background="lightblue", font=("Arial", 16, "bold"))
         self.style.configure("Red.TButton", background="lightcoral", font=("Arial", 16, "bold"))
         self.style.configure("Grid.TButton", background="white", font=("Arial", 16, "bold"))
 
-        # Add title
         title_label = ttk.Label(self, text="Tic Tac Toe", font=("Arial", 24, "bold"))
         title_label.pack(pady=10)
 
         self.create_widgets()
 
     def return_to_menu(self):
-        # Destroy all widgets in this frame
         for widget in self.winfo_children():
             widget.destroy()
-        # Destroy the frame itself
         self.destroy()
-        # Call the main menu callback
         self.main_menu_callback()
 
     def create_widgets(self):
-        # Create a frame for the grid
         self.grid_frame = ttk.Frame(self)
         self.grid_frame.pack(expand=True, pady=20)
 
-        # Create buttons for the Tic-Tac-Toe grid
         self.buttons = []
         for i in range(9):
             btn = ttk.Button(self.grid_frame, text="", width=8, style="Grid.TButton", 
-                           command=lambda idx=i: self.make_move(idx))
+                             command=lambda idx=i: self.make_move(idx))
             btn.grid(row=i // 3, column=i % 3, padx=5, pady=5)
             self.buttons.append(btn)
 
-        # Position the "Main Menu" button below the grid
         back_btn = ttk.Button(self, text="Back to Main Menu", command=self.return_to_menu)
         back_btn.pack(pady=20)
 
     def make_move(self, idx):
+        from main import connection_queue
+        from main import client_queue
+        from main import HOST, PORT
+        
+        # Ensure the player can only make a move if it's their turn
         if not self.board[idx] and self.current_player == "X":
             # Player's move
             self.board[idx] = "X"
+            print(self.board)
             self.buttons[idx].config(text="X", style="Blue.TButton")
-            
+
+            # Check for winner or tie
             if self.check_winner():
                 messagebox.showinfo("Game Over", "You win!")
+                win_packet: Packet = Packet((HOST, PORT), type=Type.GAME, category=Category.WIN, command="player wins tictactoe")
+                connection_queue.put(win_packet, block=False)
                 self.reset_game()
                 return
             elif "" not in self.board:
                 messagebox.showinfo("Game Over", "It's a tie!")
+                draw_packet: Packet = Packet(('127.0.0.1', 59386), type=Type.GAME, category=Category.DRAW, command="player ties in tictactoe")
+                connection_queue.put(draw_packet, block=False)
                 self.reset_game()
                 return
-            
-            # Computer's move
-            self.current_player = "O"
-            self.after(500, self.computer_move)
 
-    def computer_move(self):
-        # Try to win
-        move = self.find_winning_move("O")
-        if move is None:
-            # Block player's winning move
-            move = self.find_winning_move("X")
-            if move is None:
-                # Take center if available
-                if self.board[4] == "":
-                    move = 4
-                else:
-                    # Take random available move
-                    available_moves = [i for i, val in enumerate(self.board) if val == ""]
-                    move = random.choice(available_moves) if available_moves else None
+            # Send the updated board to the server
+            send_board = Packet(('127.0.0.1', 59386), type=Type.GAME, category=Category.TICTACTOE, command=self.board)
+            connection_queue.put(send_board, block=False)
+
+            # Wait for the CPU move from the server
+            cpu_move = client_queue.get()
+            while cpu_move.category != Category.TICTACTOE:
+                cpu_move = client_queue.get()
+
+            # Ensure the move is a valid index
+            print(f"Received CPU move: {cpu_move.command}")
+
+            # Apply CPU move (ensure it doesn't overwrite the player's move)
+            self.after(500, self.computer_move, cpu_move.command)
+
+
+    def computer_move(self, cpu_move: str):
+        from main import connection_queue
+        move = int(cpu_move)
+        print(f"[Client] Applying CPU move at index {move}")
 
         if move is not None:
             self.board[move] = "O"
             self.buttons[move].config(text="O", style="Red.TButton")
-            
+
             if self.check_winner():
                 messagebox.showinfo("Game Over", "Computer wins!")
+                lose_packet: Packet = Packet(('127.0.0.1', 59386), type=Type.GAME, category=Category.LOSE, command="player loses tictactoe")
+                connection_queue.put(lose_packet, block=False)
                 self.reset_game()
                 return
             elif "" not in self.board:
                 messagebox.showinfo("Game Over", "It's a tie!")
+                draw_packet: Packet = Packet(('127.0.0.1', 59386), type=Type.GAME, category=Category.DRAW, command="player ties in tictactoe")
+                connection_queue.put(draw_packet, block=False)
                 self.reset_game()
                 return
 
@@ -110,9 +119,9 @@ class TicTacToe(ttk.Frame):
 
     def check_winner(self):
         win_conditions = [
-            [0, 1, 2], [3, 4, 5], [6, 7, 8],  # Rows
-            [0, 3, 6], [1, 4, 7], [2, 5, 8],  # Columns
-            [0, 4, 8], [2, 4, 6]  # Diagonals
+            [0, 1, 2], [3, 4, 5], [6, 7, 8],
+            [0, 3, 6], [1, 4, 7], [2, 5, 8],
+            [0, 4, 8], [2, 4, 6]
         ]
         for condition in win_conditions:
             if self.board[condition[0]] == self.board[condition[1]] == self.board[condition[2]] != "":

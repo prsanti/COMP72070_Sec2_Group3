@@ -34,12 +34,10 @@ def insertWords(cursor: sqlite3.Cursor, words):
     cursor.connection.commit()
 
 def getWord(cursor: sqlite3.Cursor):
-    
-    randomNum = random.randrange(0,300)
-
+    randomNum = random.randrange(0, 300)
     cursor.execute(f"""SELECT word FROM words WHERE id = {randomNum}""")
-    word = cursor.fetchone()
-    return word
+    result = cursor.fetchone()
+    return result[0] if result else None
 
 def getAllWords(cursor: sqlite3.Cursor):
     cursor.execute("""SELECT word FROM words""")

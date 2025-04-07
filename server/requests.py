@@ -1,7 +1,8 @@
 from connection import TCP, Packet
 from connection.types import Type, Category
-from database import users, database, wordle
+from database import users, database
 from database.users import User
+from game import tictactoe
 import sqlite3
 
 
@@ -41,12 +42,19 @@ def signup_request(received_packet: Packet, addr, client_socket, server: TCP):
     server.send_packet(client_socket, signupPacket)
 
 def wordle_request(received_packet: Packet, addr, client_socket, server: TCP, chosen_word: str):
-    
+
     wordle_packet: Packet = Packet(addr, type=Type.GAME, category=Category.WORDLE, command="incorrect")
     if chosen_word == received_packet.command:
         wordle_packet.command = "correct"
         
     server.send_packet(client_socket, wordle_packet)
+
+def ttt_request(received_packet: Packet, addr, client_socket, server: TCP):
+    board = received_packet.command
+    move = tictactoe.choose_cpu_move(board=board)
+
+    move_packet: Packet = Packet(addr, type=Type.GAME, category=Category.TICTACTOE, command=move)
+    server.send_packet(client_socket=client_socket, packet=move_packet)
 
 
     
