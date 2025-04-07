@@ -24,7 +24,7 @@ from game_selection import GameSelection
 class MainApplication(tk.Tk):
     def __init__(self):
         super().__init__()
-        self.title("Game Suite")
+        self.title("Packet Play")
         self.geometry("800x600") 
         self.configure(bg="#2E3440")
         self.show_login_page()

@@ -15,7 +15,7 @@ class GameSelection(tk.Frame):
         self.create_widgets()
 
     def create_widgets(self):
-        self.title = tk.Label(self, text="Game Suite", font=("Arial", 24, "bold"))
+        self.title = tk.Label(self, text="Packet Play", font=("Arial", 24, "bold"))
         self.title.pack(pady=20)
 
         self.games = [
