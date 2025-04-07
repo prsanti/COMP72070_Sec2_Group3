@@ -20,8 +20,6 @@ from game import rps
 import requests
 import random
 
-wordle_word = ""
-
 def serverON(server: TCP):
     server.state = State.WAITINGFORCONNECTION
     client_socket, addr = server.accept_client()
@@ -46,6 +44,8 @@ def serverON(server: TCP):
                     break  # If no packet is received, assume client disconnected
                 
                 # Handle packet based on its type and category
+
+                # server state packet
                 if received_packet.type == Type.STATE:
                     if received_packet.category == Category.RPS:
                         server.state = State.RPS
@@ -56,38 +56,42 @@ def serverON(server: TCP):
                         server.state = State.TTT
                     elif received_packet.category == Category.WORDLE:
                         server.state = State.WORDLE
+                        connection, cursor = database.connectAndCreateCursor()
+                        wordle_word = wordle.getWord(cursor=cursor)
+                        print(wordle_word)
+                        connection.close()
+                        word_packet: Packet = Packet(addr, Type.STATE, Category.WORDLE, command=wordle_word)
+                        server.send_packet(client_socket=client_socket, packet=word_packet)
                     elif received_packet.category == Category.FLIP:
                         server.state = State.FLIP
                         coin = random.choice(["heads", "tails"])
                         flip_coin_packet: Packet = Packet(addr, Type.GAME, Category.FLIP, command=coin)
                         server.send_packet(client_socket=client_socket, packet=flip_coin_packet)
 
-                elif received_packet.type == Type.GAME and received_packet.category in [Category.WIN, Category.LOSE, Category.DRAW]:
+                elif received_packet.type == Type.GAME and received_packet.category == [Category.WIN, Category.LOSE, Category.DRAW]:
                     server.state = State.CONNECTED
                 
+                # login packet
                 elif received_packet.type == Type.LOGIN and received_packet.category == Category.LOGIN:
                     requests.login_request(received_packet=received_packet, addr=addr, client_socket=client_socket, server=server)
                 
+                # signup packet
                 elif received_packet.type == Type.LOGIN and received_packet.category == Category.SIGNUP:
                     requests.signup_request(received_packet=received_packet, addr=addr, client_socket=client_socket, server=server)
                 
-                elif server.state == State.WORDLE and received_packet.category == Category.WORDLE:
-                    if received_packet.command == "word":
-                        connection, cursor = database.connectAndCreateCursor()
-                        wordle_word[:] = wordle.getWord(cursor=cursor)
-                        connection.close()
-                        word_packet: Packet = Packet(addr, Type.GAME, Category.WORDLE, command=wordle_word)
-                        server.send_packet(client_socket=client_socket, packet=word_packet)
-                    else:
-                        requests.wordle_request(received_packet=received_packet, addr=addr, client_socket=client_socket, server=server)
+                
+                # tic tac toe move packet
+                elif received_packet.type == Type.GAME and received_packet.category == Category.TICTACTOE:
+                    requests.ttt_request(received_packet=received_packet, addr=addr, client_socket=client_socket, server=server)
+
                 
                 # Send win image
-                elif received_packet.type == Type.GAME and received_packet.category == Category.WIN:
-                    win_image = ""  # Placeholder for the actual win image
-                    win_packet: Packet = Packet(addr, Type.IMG, None, command=win_image)
-                    server.send_packet(addr, win_packet)
+                # elif received_packet.type == Type.GAME and received_packet.category == Category.WIN:
+                #     win_image = ""  # Placeholder for the actual win image
+                #     win_packet: Packet = Packet(addr, Type.IMG, None, command=win_image)
+                #     server.send_packet(client_socket=client_socket, packet=win_packet)
                 
-                # Optionally add more conditions here for other game categories
+
 
                 print(f"Processed Packet from {received_packet.client}")
 

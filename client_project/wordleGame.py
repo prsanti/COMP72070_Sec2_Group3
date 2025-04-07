@@ -1,18 +1,34 @@
 import tkinter as tk
 from tkinter import ttk, messagebox
 import random
+from connection.packet import Packet, Type, Category
 
 class WordleGame(ttk.Frame):
+
     def __init__(self, parent, tcp_client, main_menu_callback):
         super().__init__(parent)
         self.parent = parent
         self.tcp_client = tcp_client
         self.main_menu_callback = main_menu_callback
-        self.target_word = random.choice(["APPLE", "BRAIN", "CLOUD", "DREAM", "EARTH"])
+
+        self.target_word = self.get_word_from_server()
+
         self.guesses = []
         self.current_row = 0
         self.current_col = 0
         self.create_widgets()
+
+    def get_word_from_server(self):
+        
+        from main import client_queue
+        while True:
+            word_packet: Packet = client_queue.get()
+            if word_packet.type == Type.STATE and word_packet.category == Category.WORDLE:
+                # Unpack the tuple if needed
+                if isinstance(word_packet.command, tuple):
+                    return word_packet.command[0]
+                return word_packet.command
+
 
     def create_widgets(self):
         title = ttk.Label(self, text="WORDLE", font=("Arial", 24, "bold",))
@@ -61,6 +77,7 @@ class WordleGame(ttk.Frame):
             lbl.config(text="")
 
     def check_guess(self):
+        from main import connection_queue, PORT
         """Check the current guess and update the grid."""
         if self.current_col != 5:
             messagebox.showerror("Invalid Input", "Please enter a 5-letter word")
@@ -68,6 +85,9 @@ class WordleGame(ttk.Frame):
 
         guess = "".join([self.letter_labels[self.current_row][col].cget("text") for col in range(5)])
         self.guesses.append(guess)
+
+        gues_packet: Packet = Packet (('127.0.0.1'), type=Type.GAME, category=Category.WORDLE, command=f"{guess}")
+        connection_queue.put(gues_packet, block=False)
 
         for col, letter in enumerate(guess):
             lbl = self.letter_labels[self.current_row][col]
@@ -80,9 +100,13 @@ class WordleGame(ttk.Frame):
 
         if guess == self.target_word:
             messagebox.showinfo("Congratulations!", "You guessed the word!")
+            result_packet: Packet = Packet ('127.0.0.1', type=Type.GAME, category=Category.WIN, command=f"player guessed the correct word {self.target_word}")
+            connection_queue.put(result_packet, block=False)
             self.main_menu_callback()
         elif self.current_row == 5:
             messagebox.showinfo("Game Over", f"The word was {self.target_word}")
+            result_packet: Packet = Packet (('127.0.0.1'), type=Type.GAME, category=Category.LOSE, command=f"Player loses. The word was {self.target_word}")
+            connection_queue.put(result_packet, block=False)
             self.main_menu_callback()
         else:
             self.current_row += 1

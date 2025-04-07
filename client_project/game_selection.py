@@ -3,6 +3,7 @@ from tkinter import ttk
 from ticTacToe import TicTacToe
 from wordleGame import WordleGame
 from coinFlip import CoinFlip
+from connection.packet import Packet, Type, Category
 
 class GameSelection(tk.Frame):
     def __init__(self, parent, tcp_client):
@@ -30,6 +31,8 @@ class GameSelection(tk.Frame):
         self.quit_button.pack(pady=20)
 
     def start_game(self, game_class):
+
+        self.send_game_packet(game_class.__name__)
         # Destroy the current game frame if it exists
         if self.current_game:
             self.current_game.destroy()
@@ -40,6 +43,19 @@ class GameSelection(tk.Frame):
         # Create and display the new game instance
         self.current_game = game_class(self.parent, self.tcp_client, self.show_game_selection)
         self.current_game.pack(expand=True, fill="both")
+    
+    def send_game_packet(self, games: str):
+        from main import connection_queue
+        category: Category = None
+        if games == "TicTacToe":  
+            category = Category.TICTACTOE
+        elif games == "WordleGame":
+            category = Category.WORDLE
+        elif games == "CoinFlip": 
+            category = Category.FLIP
+
+        game_packet: Packet = Packet(('127.0.0.1', 59386), type=Type.STATE, category=category, command=f"player playing {category}")
+        connection_queue.put(game_packet)
 
     def show_game_selection(self):
         # Destroy the current game frame if it exists

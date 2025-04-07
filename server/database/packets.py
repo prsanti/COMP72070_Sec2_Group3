@@ -25,17 +25,28 @@ def creatSentPacketTable(cursor: sqlite3.Cursor):
 
 def addPacketToTable(packet: Packet):
     from .database import connectAndCreateCursor
-    
-    client_value = str(packet.client)
-    client_value = client_value.replace("'", "''")
+
     connection, cursor = connectAndCreateCursor()
-    addPacket = f"""INSERT INTO packets(packetID, client, type, category, command) 
-    values(NULL, '{client_value}', '{packet.type.name}', '{packet.category.name}', '{packet.command}')"""
 
-    cursor.execute(addPacket)
+    # Serialize the command to a string safely (e.g., using JSON)
+    import json
+    command_value = json.dumps(packet.command) if isinstance(packet.command, list) else str(packet.command)
+
+    sql = """INSERT INTO packets(packetID, client, type, category, command) 
+             VALUES (NULL, ?, ?, ?, ?)"""
+
+    values = (
+        str(packet.client),
+        packet.type.name,
+        packet.category.name,
+        command_value
+    )
+
+    cursor.execute(sql, values)
     connection.commit()
-    connection.close
+    connection.close()
 
+    
 def addSentPacketToTable(packet: Packet):
     from .database import connectAndCreateCursor
     
