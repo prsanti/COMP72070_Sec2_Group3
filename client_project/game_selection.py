@@ -3,6 +3,7 @@ from tkinter import ttk
 from ticTacToe import TicTacToe
 from wordleGame import WordleGame
 from coinFlip import CoinFlip
+from rps import RockPaperScissors
 from connection.packet import Packet, Type, Category
 
 class GameSelection(tk.Frame):
@@ -14,12 +15,13 @@ class GameSelection(tk.Frame):
         self.create_widgets()
 
     def create_widgets(self):
-        self.title = tk.Label(self, text="Game Suite", font=("Arial", 24, "bold"))
+        self.title = tk.Label(self, text="Packet Play", font=("Arial", 24, "bold"))
         self.title.pack(pady=20)
 
         self.games = [
             ("Tic-Tac-Toe", TicTacToe),
             ("Wordle", WordleGame),
+            ("Rock Paper Scissors", RockPaperScissors),
             ("Flip a Coin", CoinFlip)
         ]
 
@@ -31,7 +33,6 @@ class GameSelection(tk.Frame):
         self.quit_button.pack(pady=20)
 
     def start_game(self, game_class):
-
         self.send_game_packet(game_class.__name__)
         # Destroy the current game frame if it exists
         if self.current_game:
@@ -51,6 +52,8 @@ class GameSelection(tk.Frame):
             category = Category.TICTACTOE
         elif games == "WordleGame":
             category = Category.WORDLE
+        elif games == "RockPaperScissors":
+            category = Category.RPS
         elif games == "CoinFlip": 
             category = Category.FLIP
 
@@ -61,6 +64,8 @@ class GameSelection(tk.Frame):
         # Destroy the current game frame if it exists
         if self.current_game:
             self.current_game.destroy()
+            self.current_game = None
 
         # Show the game selection screen
         self.pack(expand=True, fill="both")
+        self.lift()  # Bring the game selection screen to the front

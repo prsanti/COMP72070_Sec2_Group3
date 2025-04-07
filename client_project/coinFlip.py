@@ -4,7 +4,7 @@ import random
 import os
 
 class CoinFlip(ttk.Frame):
-    def __init__(self, parent, main_menu_callback, tcp_client=None):
+    def __init__(self, parent, tcp_client, main_menu_callback):
         super().__init__(parent)
         self.parent = parent
         self.tcp_client = tcp_client
@@ -48,8 +48,10 @@ class CoinFlip(ttk.Frame):
 
         flip_btn = ttk.Button(self, text="Flip Coin", command=self.start_spin)
         flip_btn.pack(pady=10)
+
+        # Add back button
         back_btn = ttk.Button(self, text="Main Menu", command=self.main_menu_callback)
-        back_btn.pack(pady=10)
+        back_btn.pack(pady=20)
 
     def start_spin(self):
         """Start the spinning animation."""

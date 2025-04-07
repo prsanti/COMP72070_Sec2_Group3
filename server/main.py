@@ -1,4 +1,3 @@
-
 import sqlite3
 import argparse
 import unittest
@@ -83,7 +82,12 @@ def serverON(server: TCP):
                 # tic tac toe move packet
                 elif received_packet.type == Type.GAME and received_packet.category == Category.TICTACTOE:
                     requests.ttt_request(received_packet=received_packet, addr=addr, client_socket=client_socket, server=server)
-
+                
+                # RPS move packet
+                elif received_packet.type == Type.GAME and received_packet.category == Category.RPS:
+                    move = rps.getRPS()
+                    rps_packet: Packet = Packet(addr, Type.GAME, Category.RPS, command=move)
+                    server.send_packet(client_socket=client_socket, packet=rps_packet)
                 
                 # Send win image
                 # elif received_packet.type == Type.GAME and received_packet.category == Category.WIN:
@@ -155,7 +159,7 @@ if __name__ == '__main__':
         from gui import server_ui  # 🛠 Import after database setup
         print("Initial data loaded successfully.")
 
-        ui.run(reload=False)  # Runs UI in main thread
+        ui.run(reload=False, port=8081)  # Changed port to 8081
         while True:
             time.sleep(1)  # Keep the script alive
     except KeyboardInterrupt:

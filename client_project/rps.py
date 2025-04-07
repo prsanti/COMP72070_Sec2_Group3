@@ -1,25 +1,22 @@
 import tkinter as tk
-from tkinter import ttk
-from rps import RockPaperScissors
+from tkinter import ttk, messagebox
+from connection.packet import Packet, Type, Category
 
-class GameSelection(ttk.Frame):
-    def __init__(self, parent, tcp_client, main_menu_callback, tic_tac_toe_callback, wordle_callback, coin_flip_callback):
+class RockPaperScissors(ttk.Frame):
+    def __init__(self, parent, tcp_client, main_menu_callback):
         super().__init__(parent)
         self.parent = parent
         self.tcp_client = tcp_client
         self.main_menu_callback = main_menu_callback
-        self.tic_tac_toe_callback = tic_tac_toe_callback
-        self.wordle_callback = wordle_callback
-        self.coin_flip_callback = coin_flip_callback
         
         self.create_widgets()
 
     def create_widgets(self):
         # Title
-        title_label = ttk.Label(self, text="Select a Game", font=("Arial", 24, "bold"))
-        title_label.pack(pady=40)
+        title_label = ttk.Label(self, text="Rock Paper Scissors", font=("Arial", 24, "bold"))
+        title_label.pack(pady=20)
         
-        # Game selection buttons
+        # Game buttons
         button_frame = ttk.Frame(self)
         button_frame.pack(expand=True)
         
@@ -27,59 +24,59 @@ class GameSelection(ttk.Frame):
         style = ttk.Style()
         style.configure("Game.TButton", font=("Arial", 14), padding=20)
         
-        # Tic Tac Toe button
-        tic_tac_toe_btn = ttk.Button(
+        # Rock button
+        rock_btn = ttk.Button(
             button_frame,
-            text="Tic Tac Toe",
+            text="Rock",
             style="Game.TButton",
-            command=self.tic_tac_toe_callback
+            command=lambda: self.make_move("rock")
         )
-        tic_tac_toe_btn.pack(pady=10)
+        rock_btn.pack(pady=10)
         
-        # Rock Paper Scissors button
-        rps_btn = ttk.Button(
+        # Paper button
+        paper_btn = ttk.Button(
             button_frame,
-            text="Rock Paper Scissors",
+            text="Paper",
             style="Game.TButton",
-            command=self.start_rps
+            command=lambda: self.make_move("paper")
         )
-        rps_btn.pack(pady=10)
+        paper_btn.pack(pady=10)
         
-        # Wordle button
-        wordle_btn = ttk.Button(
+        # Scissors button
+        scissors_btn = ttk.Button(
             button_frame,
-            text="Wordle",
+            text="Scissors",
             style="Game.TButton",
-            command=self.wordle_callback
+            command=lambda: self.make_move("scissors")
         )
-        wordle_btn.pack(pady=10)
-        
-        # Coin Flip button
-        coin_flip_btn = ttk.Button(
-            button_frame,
-            text="Coin Flip",
-            style="Game.TButton",
-            command=self.coin_flip_callback
-        )
-        coin_flip_btn.pack(pady=10)
+        scissors_btn.pack(pady=10)
         
         # Back button
-        back_btn = ttk.Button(self, text="Back to Main Menu", command=self.main_menu_callback)
+        back_btn = ttk.Button(self, text="Main Menu", command=self.main_menu_callback)
         back_btn.pack(pady=20)
 
-    def start_rps(self):
-        self.destroy()
-        game = RockPaperScissors(self.parent, self.show_game_selection)
-        game.pack(expand=True, fill='both')
+    def make_move(self, move):
+        from main import connection_queue, client_queue
+        
+        # Send the player's move to the server
+        move_packet = Packet(('127.0.0.1', 59386), type=Type.GAME, category=Category.RPS, command=move)
+        connection_queue.put(move_packet)
+        
+        # Wait for the server's response
+        while True:
+            response = client_queue.get()
+            if response.type == Type.GAME and response.category == Category.RPS:
+                cpu_move = response.command
+                result = self.determine_winner(move, cpu_move)
+                messagebox.showinfo("Result", f"CPU chose {cpu_move}\n{result}")
+                break
 
-    def show_game_selection(self):
-        self.destroy()
-        self.game_selection = GameSelection(
-            self.parent,
-            self.tcp_client,
-            self.main_menu_callback,
-            self.tic_tac_toe_callback,
-            self.wordle_callback,
-            self.coin_flip_callback
-        )
-        self.game_selection.pack(expand=True, fill="both")
+    def determine_winner(self, player_move, cpu_move):
+        if player_move == cpu_move:
+            return "It's a tie!"
+        elif (player_move == "rock" and cpu_move == "scissors") or \
+             (player_move == "paper" and cpu_move == "rock") or \
+             (player_move == "scissors" and cpu_move == "paper"):
+            return "You win!"
+        else:
+            return "You lose!"
