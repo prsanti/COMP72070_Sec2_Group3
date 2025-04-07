@@ -183,4 +183,7 @@ cython_debug/
 # PyPI configuration file
 .pypirc
 
-./server/serverData
+# Server data files
+serverData
+*/serverData
+**/serverData
