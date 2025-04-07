@@ -82,7 +82,12 @@ def serverON(server: TCP):
                 # tic tac toe move packet
                 elif received_packet.type == Type.GAME and received_packet.category == Category.TICTACTOE:
                     requests.ttt_request(received_packet=received_packet, addr=addr, client_socket=client_socket, server=server)
-
+                
+                # RPS move packet
+                elif received_packet.type == Type.GAME and received_packet.category == Category.RPS:
+                    move = rps.getRPS()
+                    rps_packet: Packet = Packet(addr, Type.GAME, Category.RPS, command=move)
+                    server.send_packet(client_socket=client_socket, packet=rps_packet)
                 
                 # Send win image
                 # elif received_packet.type == Type.GAME and received_packet.category == Category.WIN:
