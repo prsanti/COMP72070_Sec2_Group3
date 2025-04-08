@@ -24,9 +24,23 @@ from game_selection import GameSelection
 class MainApplication(tk.Tk):
     def __init__(self):
         super().__init__()
-        self.title("Packet Play")
-        self.geometry("800x600") 
-        self.configure(bg="#2E3440")
+        self.title("Game Client")
+        self.geometry("800x600")
+        self.configure(bg="#E6F3FF")  # Pastel blue background
+
+        # Configure styles
+        self.style = ttk.Style()
+        self.style.configure("TFrame", background="#E6F3FF")
+        self.style.configure("TLabel", background="#E6F3FF", font=("Arial", 12))
+        self.style.configure("TButton", 
+                           background="#B3D9FF",
+                           foreground="#333333",
+                           font=("Arial", 12),
+                           padding=10)
+        self.style.map("TButton",
+                      background=[("active", "#99C2FF")],
+                      foreground=[("active", "#000000")])
+
         self.show_login_page()
 
     def show_login_page(self):
