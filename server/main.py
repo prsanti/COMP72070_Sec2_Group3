@@ -39,19 +39,25 @@ def serverON(server: TCP):
 
         # Process packets continuously until the client disconnects
         while True:
-            print("Q Size Before", connection_queue.qsize())
             try:
-                print("Try before")
+                # Get mesage from Queue
                 message_packet : Packet = connection_queue.get(timeout=1.0)
-                print("Q Size",  connection_queue.qsize())
                 if (message_packet):
-                    print("Packet: ", message_packet)
+                    # send message packet to client
                     server.send_packet(client_socket=client_socket, packet=message_packet)
+                    # repeat the loop
+                    continue
             except queue.Empty:
-                print("No Message in Queue")
+                # print("No Message in Queue")
+                # repeat loop if empty
+                continue
             try:
                 # Receive the next packet from the client
                 received_packet: Packet = server.receive_packet(client_socket)
+
+                # repeat loop until packet is received
+                if received_packet is None:
+                    continue
                 
                 if not received_packet:
                     print(f"Client {addr} disconnected or sent an empty packet")

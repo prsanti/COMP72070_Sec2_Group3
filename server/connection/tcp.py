@@ -4,6 +4,7 @@ import unittest
 from .packet import Packet
 from .types import State
 from database import packets
+import select
 
 HOST = "127.0.0.1"
 PORT = 27000
@@ -141,16 +142,26 @@ class TCP:
     def receive_packet(self, client_socket):
         """Receive a Packet object from the client."""
         try:
+            # timeout every 5s
+            timeout = 5.0
+            # loop until server receives a packet
+            ready, _, _ = select.select([client_socket], [], [], timeout)
+            
+            if not ready:
+                # print("Waiting for client response...")
+                return None
+            
             data = client_socket.recv(4096)  # Receive a larger buffer
             if data:
                 packet = Packet.deserialize(data)
                 print(f"Received Packet: {packet.__dict__}")
                 packets.addPacketToTable(packet=packet)
                 return packet
-            else:
-                print("Client disconnected.")
-                self.clients.remove(client_socket)
-                client_socket.close()
+            # comment out so client does not disconnect
+            # else:
+            #     print("Client disconnected.")
+            #     self.clients.remove(client_socket)
+            #     client_socket.close()
         except socket.error as e:
             print(f"Error receiving packet: {e}")
 
