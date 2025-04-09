@@ -12,31 +12,45 @@ database_info = []
 packet_list = []
 sent_packet_list = []
 
-
 def load_initial_data():
     global chat_logs, wordle_list, database_info, packet_list, sent_packet_list
     conn, cursor = database.connectAndCreateCursor()
-    chat_logs = chatLogs.getAllMessages(cursor=cursor)  # Load all chat history from the database
-    current_chat_logs.clear()  # Ensure the current chat logs are empty at the start
+    chat_logs = chatLogs.getAllMessages(cursor=cursor)
+    current_chat_logs.clear()
     wordle_list = wordle.getAllWords(cursor=cursor)
     database_info = users.getAllUsers(cursor=cursor)
     packet_list = packets.getAllPackets(cursor=cursor)
     sent_packet_list = packets.getAllSentPackets(cursor=cursor)
+    conn.close()
+    # Update server state label
+    # update_state_label()
 
-    conn.close()  
 
 def get_updated_data():
     conn, cursor = database.connectAndCreateCursor()
-    chat_logs[:] = chatLogs.getAllMessages(cursor=cursor)  # Reload all chat history from the database
-    current_chat_logs[:] = chatLogs.getRecentMessages(cursor=cursor)  # Reload only the most recent chat logs
+    chat_logs[:] = chatLogs.getAllMessages(cursor=cursor)
+    current_chat_logs[:] = chatLogs.getRecentMessages(cursor=cursor)
     database_info[:] = users.getAllUsers(cursor=cursor)
     packet_list[:] = packets.getAllPackets(cursor=cursor)
     sent_packet_list[:] = packets.getAllSentPackets(cursor=cursor)
-    conn.close()  
+    conn.close()
+
     update_chat_display()
     update_database_info_display()
     update_packet_display()
-    update_sent_packet_display()  
+    update_sent_packet_display()
+    # update_state_label()
+
+# def update_state_label():
+#     from global_server import global_server
+#     # global server_state_label
+
+#     if server_state_label:
+#         if global_server and global_server.state:
+#             server_state_label.text = f"Current state: {global_server.state.name}"
+#         else:
+#             server_state_label.text = "Current state: Not connected"
+
 
 def update_chat_display():
     current_chat_log_container.clear()
@@ -115,7 +129,9 @@ with ui.row().style("width: 100%; height: 100%; gap: 20px;"):
                     ui.button("Disconnect")
 
         with ui.card().style("width: 100%;"):
-            ui.label("Current state: In game")
+            ui.label("Server State:")
+            # dynamic label updates on global server state
+            ui.label("Waiting for server...").style("font-weight: bold; font-size: 16px;")
 
         with ui.card().style("width: 100%;"):
             ui.label("Packets").style("font-weight: bold; font-size: 18px; margin-bottom: 10px;")

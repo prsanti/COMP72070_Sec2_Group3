@@ -143,13 +143,13 @@ class TCP:
         """Receive a Packet object from the client."""
         try:
             # timeout every 5s
-            # timeout = 5.0
-            # # loop until server receives a packet
-            # ready, _, _ = select.select([client_socket], [], [], timeout)
+            timeout = 5.0
+            # loop until server receives a packet
+            ready, _, _ = select.select([client_socket], [], [], timeout)
             
-            # if not ready:
-            #     # print("Waiting for client response...")
-            #     return None
+            if not ready:
+                # print("Waiting for client response...")
+                return None
             
             data = client_socket.recv(4096)  # Receive a larger buffer
             if data:
