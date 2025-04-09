@@ -24,24 +24,74 @@ from game_selection import GameSelection
 class MainApplication(tk.Tk):
     def __init__(self):
         super().__init__()
-        self.title("Packet Play")
-        self.geometry("800x600") 
-        self.configure(bg="#2E3440")
+        self.title("Game Client")
+        self.geometry("800x600")
+        self.configure(bg="#E6F3FF")  # Pastel blue background
+
+        # Configure styles
+        self.style = ttk.Style()
+        self.style.configure("TFrame", background="#E6F3FF")
+        self.style.configure("TLabel", background="#E6F3FF", font=("Arial", 12))
+        self.style.configure("TButton", 
+                           background="#B3D9FF",
+                           foreground="#333333",
+                           font=("Arial", 12),
+                           padding=10)
+        self.style.configure("TEntry", 
+                           fieldbackground="white",
+                           foreground="#333333",
+                           font=("Arial", 12))
+        self.style.map("TButton",
+                      background=[("active", "#99C2FF")],
+                      foreground=[("active", "#000000")])
+
+        # Create main container
+        self.container = ttk.Frame(self)
+        self.container.pack(fill="both", expand=True, padx=20, pady=20)
+        
+        # Create chat frame (initially hidden)
+        self.chat_frame = ttk.Frame(self.container, style="TFrame")
+        
+        # Chat input
+        self.chat_entry = ttk.Entry(self.chat_frame, style="TEntry", width=25)
+        self.chat_entry.pack(side="left", fill="x", expand=True, padx=(0, 5))
+        self.chat_entry.bind("<Return>", self.send_chat_message)
+        
+        self.send_button = ttk.Button(self.chat_frame, text="Send", command=self.send_chat_message)
+        self.send_button.pack(side="right")
+
         self.show_login_page()
 
+    def send_chat_message(self, event=None):
+        message = self.chat_entry.get().strip()
+        if message and self.tcp_client:
+            # Create chat packet
+            packet = Packet(
+                type=Type.CHAT,
+                category=Category.CHAT,
+                client=self.tcp_client.client_id,
+                command=message
+            )
+            connection_queue.put(packet)
+            self.chat_entry.delete(0, tk.END)
+
     def show_login_page(self):
+        self.chat_frame.place_forget()  # Hide chat on login screen
         self.login_page = LoginPage(self, self.on_login_success)
         self.login_page.pack(expand=True, fill="both")
 
     def on_login_success(self, tcp_client):
+        self.tcp_client = tcp_client
         self.login_page.pack_forget()
+        self.chat_frame.place(relx=1.0, rely=1.0, anchor="se", x=-10, y=-10)  # Show chat after login
         self.game_selection = GameSelection(self, tcp_client)
         self.game_selection.pack(expand=True, fill="both")
 
     def clear_window(self):
         for widget in self.winfo_children():
-            widget.destroy()
-            widget.pack_forget()
+            if isinstance(widget, (TicTacToe, WordleGame, CoinFlip)):
+                widget.destroy()
+        self.chat_frame.place(relx=1.0, rely=1.0, anchor="se", x=-10, y=-10)  # Keep chat visible when switching games
 
     def show_game_selection(self):
         # Clear any existing game frames

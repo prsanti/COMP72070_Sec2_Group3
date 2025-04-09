@@ -12,10 +12,12 @@ class GameSelection(tk.Frame):
         self.parent = parent
         self.tcp_client = tcp_client
         self.current_game = None  # Track the current game instance
-        self.create_widgets()
-
-    def create_widgets(self):
-        self.title = tk.Label(self, text="Packet Play", font=("Arial", 24, "bold"))
+        
+        # Configure frame
+        self.configure(bg="#E6F3FF")  
+        
+        # Title
+        self.title = tk.Label(self, text="Packet Play", font=("Arial", 24, "bold"), bg="#E6F3FF")
         self.title.pack(pady=20)
 
         self.games = [
