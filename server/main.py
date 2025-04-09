@@ -50,7 +50,7 @@ def serverON(server: TCP):
             except queue.Empty:
                 # print("No Message in Queue")
                 # repeat loop if empty
-                continue
+                None
             try:
                 # Receive the next packet from the client
                 received_packet: Packet = server.receive_packet(client_socket)
