@@ -11,6 +11,7 @@ from coinFlip import CoinFlip
 from wordleGame import WordleGame
 import socket
 from connection import Packet
+from connection.types import Type
 
 HOST = "127.0.0.1"
 PORT = 27000
@@ -78,9 +79,13 @@ def handle_socket_connection():
 
         while True:
             try:
-                buffer = client.receive_packet(s)
+                buffer : Packet = client.receive_packet(s)
                 if buffer:
                     print(f"Received packet from server: {buffer.client}, Command: {buffer.command}")
+
+                    if buffer.type == Type.CHAT:
+                        print(f"Received packet from server: {buffer.client}, Command: {buffer.command}")
+
                     # Put the received packet into the queue for the main thread to process
                     client_queue.put(buffer, block=False)
             except BlockingIOError:

@@ -154,6 +154,9 @@ class TCP:
         except socket.error as e:
             print(f"Error receiving packet: {e}")
 
+        except BlockingIOError:
+            return None
+        
         except socket.error as e:
           print(f"Error receiving packet: {e}")
 

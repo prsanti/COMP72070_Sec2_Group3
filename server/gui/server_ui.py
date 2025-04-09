@@ -1,6 +1,7 @@
 from nicegui import ui
 from database import wordle, chatLogs, users, packets
 from database import database
+from chat import chat
 
 # hard coded data for visuals
 connected_clients = ["Client 1 - User1 - Playing tictactoe", "Client 2 - User2 - Playing tictactoe"]
@@ -82,17 +83,23 @@ def update_sent_packet_display():
             ui.label(category).style("width: 100px;")
             ui.label(command).style("width: 100px;")
 
+
 def send_message(value):
-    # Add the new message to both chat history and current chat logs
-    chat_logs.append(f"Server: {value}")
-    current_chat_logs.append(f"Server: {value}")
-    
+    if not value.strip():
+        print("No text inputted")
+        return
+
+    # print(f"textbox: {value}")
+
+    # send message from server to client
+    chat.sendMessageToClient(value)
+
     # Display the updated current chat logs
     current_chat_log_container.clear()
     with current_chat_log_container:
         for log in current_chat_logs:
             ui.label(log)
-    
+
     get_updated_data()
 
 # Load initial data when the app starts
@@ -163,18 +170,17 @@ with ui.row().style("width: 100%; height: 100%; gap: 20px;"):
     with ui.column().style("flex: 1;"):
         with ui.card().style("width: 100%;"):
             ui.label("All Chat History")
-            # Display chat logs (full history) here
             with ui.row().style("flex: 1"):
                 for log in chat_logs:
-                    ui.label(log)  # Display full chat history here
-            
-            ui.input(placeholder="Send message to all users:", on_change=lambda e: send_message(e.value))
-            ui.button("Send", on_click=lambda i=i: send_message(i.value))
+                    ui.label(log)
 
+            message_input = ui.input(placeholder="Send message to all users:").props('clearable')
+            ui.button("Send", on_click=lambda: send_message(message_input.value))
 
         with ui.card().style("width: 100%;"):
             ui.label("Current Chat Logs:")
-            current_chat_log_container = ui.column()  # To display only the current chat logs
-            update_chat_display()  # Initially display new chat logs (currently empty)
+            current_chat_log_container = ui.column()
+            update_chat_display()
 
+#update the ui every 5 seconds
 ui.timer(5.0, get_updated_data)
