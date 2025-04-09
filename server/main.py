@@ -20,12 +20,12 @@ import requests
 import random
 import queue
 from connection.queue import SingletonQueue
-
 # global queue variable
 connection_queue = SingletonQueue("connection_queue")
 
 def serverON(server: TCP):
     server.state = State.WAITINGFORCONNECTION
+
     client_socket, addr = server.accept_client()
 
     if client_socket:
@@ -90,7 +90,7 @@ def serverON(server: TCP):
 
                 elif received_packet.type == Type.GAME and received_packet.category == [Category.WIN, Category.LOSE, Category.DRAW]:
                     server.state = State.CONNECTED
-                
+
                 # login packet
                 elif received_packet.type == Type.LOGIN and received_packet.category == Category.LOGIN:
                     requests.login_request(received_packet=received_packet, addr=addr, client_socket=client_socket, server=server)
@@ -164,13 +164,13 @@ def start_tcp_server():
 
 if __name__ == '__main__':
     # Create a test suite for classes
-    # suite = unittest.TestSuite()
-    # suite.addTests(unittest.TestLoader().loadTestsFromTestCase(TestPacket))
-    # suite.addTests(unittest.TestLoader().loadTestsFromTestCase(TestTCP))
+    suite = unittest.TestSuite()
+    suite.addTests(unittest.TestLoader().loadTestsFromTestCase(TestPacket))
+    suite.addTests(unittest.TestLoader().loadTestsFromTestCase(TestTCP))
     
-    # # Run tests
-    # print("Running all tests...")
-    # unittest.TextTestRunner(verbosity=2).run(suite)
+    # Run tests
+    print("Running all tests...")
+    unittest.TextTestRunner(verbosity=2).run(suite)
     
     # Server code - comment out to run tests
     print("Setting up the database...")
