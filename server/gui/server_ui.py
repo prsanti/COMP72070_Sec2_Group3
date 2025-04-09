@@ -36,52 +36,46 @@ def get_updated_data():
     update_chat_display()
     update_database_info_display()
     update_packet_display()
-    update_sent_packet_display()  # Ensure sent packets are updated
+    update_sent_packet_display()  
 
 def update_chat_display():
-    current_chat_log_container.clear()  # Clear the current chat logs section
+    current_chat_log_container.clear()
     with current_chat_log_container:
         for log in current_chat_logs:
             ui.label(log)
 
 def update_database_info_display():
     database_info_container.clear()
-    
-    with database_info_container:
-        with ui.row().style("font-weight: bold;"):
-            ui.label("UserID").style("width: 80px;")
-            ui.label("Username").style("width: 150px;")
-            ui.label("Email").style("width: 150px;")
-            ui.label("Role").style("width: 15%;")
 
-        # Populate the table with user data
+    with database_info_container:
         for user_id, username, email, is_admin in database_info:
             role = "Admin" if is_admin else "Player"
-            with ui.row().style("width: 100%;"):
-                ui.label(str(user_id)).style("width: 80px;")
-                ui.label(username).style("width: 150px;")
-                ui.label(email).style("width: 250px;")
-                ui.label(role).style("width: 100px;")
+            ui.label(str(user_id))
+            ui.label(username)
+            ui.label(email)
+            ui.label(role)
+
 
 def update_packet_display():
-    packet_display.clear()  # Clear previous packet list
+    packet_display.clear()
     with packet_display:
         for packet_id, client, type, category, command in packet_list:
-            ui.label(str(packet_id)).style("width: 80px;")
-            ui.label(client).style("width: 150px;")
-            ui.label(type).style("width: 250px;")
-            ui.label(category).style("width: 100px;")
-            ui.label(command).style("width: 100px;")
+            ui.label(str(packet_id))
+            ui.label(client)
+            ui.label(type)
+            ui.label(category)
+            ui.label(command)
+
 
 def update_sent_packet_display():
-    sent_packet_display.clear()  # Clear previous sent packet list
+    sent_packet_display.clear()
     with sent_packet_display:
         for packet_id, client, type, category, command in sent_packet_list:
-            ui.label(str(packet_id)).style("width: 80px;")
-            ui.label(client).style("width: 150px;")
-            ui.label(type).style("width: 250px;")
-            ui.label(category).style("width: 100px;")
-            ui.label(command).style("width: 100px;")
+            ui.label(str(packet_id))
+            ui.label(client)
+            ui.label(type)
+            ui.label(category)
+            ui.label(command)
 
 
 def send_message(value):
@@ -124,48 +118,79 @@ with ui.row().style("width: 100%; height: 100%; gap: 20px;"):
             ui.label("Current state: In game")
 
         with ui.card().style("width: 100%;"):
-            with ui.row().style("font-weight: bold;"):
-                ui.label("Packet number").style("width: 80px;")
-                ui.label("Client").style("width: 150px;")
-                ui.label("Type").style("width: 150px;")
-                ui.label("Category").style("width: 15%;")
-                ui.label("Command").style("width: 15%;")
-                with ui.scroll_area().classes('w-100 h-32 border'):
-                    packet_display = ui.column()
+            ui.label("Packets").style("font-weight: bold; font-size: 18px; margin-bottom: 10px;")
 
-                    update_packet_display()
+            # Grid header for packets
+            with ui.grid(columns=5).style("font-weight: bold; width: 100%;"):
+                ui.label("Packet #")
+                ui.label("Client")
+                ui.label("Type")
+                ui.label("Category")
+                ui.label("Command")
 
-                ui.label("Sent Packets")
-                with ui.scroll_area().classes('w-100 h-32 border'):
-                    sent_packet_display = ui.column()
-                    update_sent_packet_display()  # Add this line to show sent packets
-            
+            # Scroll area for packet rows
+            with ui.scroll_area().classes('w-100 h-40 border'):
+                packet_display = ui.grid(columns=5).classes('w-full')
+                for packet_id, client, type, category, command in packet_list:
+                    packet_display.clear()
+                    with packet_display:
+                        ui.label(str(packet_id))
+                        ui.label(client)
+                        ui.label(type)
+                        ui.label(category)
+                        ui.label(command)
+
+            ui.label("Sent Packets").style("font-weight: bold; margin-top: 20px;")
+
+            # Grid header for sent packets
+            with ui.grid(columns=5).style("font-weight: bold; width: 100%;"):
+                ui.label("Packet #")
+                ui.label("Client")
+                ui.label("Type")
+                ui.label("Category")
+                ui.label("Command")
+
+            # Scroll area for sent packet rows
+            with ui.scroll_area().classes('w-100 h-40 border'):
+                sent_packet_display = ui.grid(columns=5).classes('w-full')
+                for packet_id, client, type, category, command in sent_packet_list:
+                    sent_packet_display.clear()
+                    with sent_packet_display:
+                        ui.label(str(packet_id))
+                        ui.label(client)
+                        ui.label(type)
+                        ui.label(category)
+                        ui.label(command)
+
+
     with ui.column().style("flex: 1;"):
+        # Database Info Card
         with ui.card().style("width: 100%;"):
-            ui.label("Database Information:")
-            database_info_container = ui.column()
+            ui.label("Database Information:").style("font-weight: bold; margin-bottom: 10px;")
+            
+            # header for user info
+            with ui.grid(columns=4).style("font-weight: bold; width: 100%;"):
+                ui.label("UserID")
+                ui.label("Username")
+                ui.label("Email")
+                ui.label("Role")
+            
+            # user info
+            database_info_container = ui.grid(columns=4).classes("w-full")
             update_database_info_display()
 
+        # Word List Card
         with ui.card().style("width: 100%;"):
-            ui.label("Word list:")
-                
-            # Wrap the two scroll areas inside a ui.row()
-            with ui.row().style("flex: 1; justify-content: space-between;"):
+            ui.label("Word list:").style("font-weight: bold; margin-bottom: 10px;")
 
-                with ui.scroll_area().classes('w-20 h-32 border'):
-                    for i in range(100):
-                        word = wordle_list[i]
-                        ui.label(word).style("word-wrap: break-word; padding-bottom: 5px;")
-
-                with ui.scroll_area().classes('w-20 h-32 border'):
-                    for i in range(100):
-                        word = wordle_list[i + 100]
-                        ui.label(word).style("word-wrap: break-word; padding-bottom: 5px;")
-                
-                with ui.scroll_area().classes('w-20 h-32 border'):
-                    for i in range(100):
-                        word = wordle_list[i + 200]
-                        ui.label(word).style("word-wrap: break-word; padding-bottom: 5px;")
+            # Word list as a 3-column grid instead of scroll + row combo
+            with ui.grid(columns=3).classes("w-full gap-4"):
+                for col_start in range(0, 300, 100):
+                    with ui.scroll_area().classes('w-full h-50 border'):
+                        with ui.column().classes("w-full"):
+                            for i in range(100):
+                                word = wordle_list[col_start + i]
+                                ui.label(word).style("word-wrap: break-word; padding-bottom: 5px;")
 
     with ui.column().style("flex: 1;"):
         with ui.card().style("width: 100%;"):
