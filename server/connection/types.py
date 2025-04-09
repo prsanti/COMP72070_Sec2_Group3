@@ -20,6 +20,7 @@ class Category(Enum):
   LOGIN = 8
   SIGNUP = 9
   FLIP = 10
+  CHAT = 11
   
 class State(Enum):
 

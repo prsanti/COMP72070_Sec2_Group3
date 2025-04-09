@@ -5,7 +5,7 @@ server_start_time = datetime.datetime.now()
 
 class Message:
 
-    date: datetime = None
+    date: datetime
     userID: int = None
     message: str = None
 
@@ -26,8 +26,7 @@ def createChatTable(cursor):
     ''')
 
         
-def insertMessage(cursor: sqlite3.Cursor, message: Message):
-    
+def insertMessage(cursor: sqlite3.Cursor, message: Message, date: datetime):
     cursor.execute('''
     INSERT INTO messages (userID, message, date)
     VALUES (?, ?, ?)
