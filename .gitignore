@@ -187,3 +187,7 @@ cython_debug/
 serverData
 */serverData
 **/serverData
+*/serverData-shm
+**/serverData-shm
+*/serverData-wal
+**/serverData-wal

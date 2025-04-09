@@ -18,6 +18,11 @@ from database.users import User
 from game import rps
 import requests
 import random
+import queue
+from connection.queue import SingletonQueue
+
+# global queue variable
+connection_queue = SingletonQueue("connection_queue")
 
 def serverON(server: TCP):
     server.state = State.WAITINGFORCONNECTION
@@ -35,8 +40,24 @@ def serverON(server: TCP):
         # Process packets continuously until the client disconnects
         while True:
             try:
+                # Get mesage from Queue
+                message_packet : Packet = connection_queue.get(timeout=1.0)
+                if (message_packet):
+                    # send message packet to client
+                    server.send_packet(client_socket=client_socket, packet=message_packet)
+                    # repeat the loop
+                    continue
+            except queue.Empty:
+                # print("No Message in Queue")
+                # repeat loop if empty
+                None
+            try:
                 # Receive the next packet from the client
                 received_packet: Packet = server.receive_packet(client_socket)
+
+                # repeat loop until packet is received
+                if received_packet is None:
+                    continue
                 
                 if not received_packet:
                     print(f"Client {addr} disconnected or sent an empty packet")
@@ -88,6 +109,9 @@ def serverON(server: TCP):
                     move = rps.getRPS()
                     rps_packet: Packet = Packet(addr, Type.GAME, Category.RPS, command=move)
                     server.send_packet(client_socket=client_socket, packet=rps_packet)
+
+                elif received_packet.type == Type.CHAT:
+                    print("Chat received from client")
                 
                 # Send win image
                 # elif received_packet.type == Type.GAME and received_packet.category == Category.WIN:
@@ -102,6 +126,9 @@ def serverON(server: TCP):
             except Exception as e:
                 print(f"Error while processing packet: {e}")
                 break  # If an error occurs, break out of the loop
+            except BlockingIOError:
+                pass
+
 
         # Close the connection after the loop ends (client disconnected)
         client_socket.close()
