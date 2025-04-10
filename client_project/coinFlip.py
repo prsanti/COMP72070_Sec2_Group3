@@ -70,7 +70,7 @@ class CoinFlip(ttk.Frame):
             # Randomly switch between heads and tails
             self.coin_label.config(image=random.choice([self.heads_img, self.tails_img]))
             self.spin_count += 1
-            self.after(200, self.spin_coin)  # Update every 200ms
+            self.after(50, self.spin_coin)  # Update every 200ms
         else:
             self.finish_spin()
 
