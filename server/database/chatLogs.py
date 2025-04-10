@@ -1,7 +1,7 @@
 import datetime
 import sqlite3
 from database.users import User
-server_start_time = datetime.datetime.now()
+server_start_time = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
 
 class Message:
 
@@ -48,6 +48,6 @@ def getAllMessages(cursor: sqlite3.Cursor):
 
 def getRecentMessages(cursor: sqlite3.Cursor):
     # Fetch only the messages that are considered "new" after server started
-    select_message = """SELECT * FROM messages WHERE date > ?"""  # Customize as needed (e.g., server start time)
+    select_message = """SELECT date, user, message FROM messages WHERE date > ?"""
     cursor.execute(select_message, (server_start_time,))
     return cursor.fetchall()

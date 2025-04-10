@@ -111,14 +111,14 @@ def send_message(value):
     # send message from server to client
     chat.sendMessageToClient(value)
 
-    message: Message = Message(datetime.datetime.now().strftime('%Y-%m-%d %H:%M'), "server", value)
+    message: Message = Message(datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'), "server", value)
     chatLogs.insertMessage(message=message)
 
     get_updated_data()
 
 def disconnect_user():
     from main import connection_queue
-    disconnect_packet: Packet = Packet(client="", type=Type.STATE, category=Category.STATE, command="")
+    disconnect_packet: Packet = Packet(client="1", type=Type.STATE, category=Category.STATE, command="1")
     connection_queue.put(disconnect_packet)
 
 # Load initial data when the app starts
@@ -191,7 +191,7 @@ with ui.row().style("width: 100%; height: 100%; gap: 20px;"):
             
             with ui.row():
                 ui.label("client")
-                ui.button("Disconnect")
+                ui.button("Disconnect", on_click= disconnect_user())
 
         # Database Info Card
         with ui.card().style("width: 100%;"):
@@ -248,7 +248,7 @@ with ui.row().style("width: 100%; height: 100%; gap: 20px;"):
             with ui.scroll_area().classes('w-100 h-40 border'):
                 current_chat_log_container = ui.grid(columns=3).classes('w-full')
                 update_chat_display()
-            update_chat_display()
+            
 
 #update the ui every 5 seconds
 ui.timer(5.0, get_updated_data)

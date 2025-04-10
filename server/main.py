@@ -50,8 +50,8 @@ def serverON(server: TCP):
                     # send message packet to client
                     if (message_packet.type == Type.CHAT):
                         server.send_packet(client_socket=client_socket, packet=message_packet)
-                    # elif (message_packet.type == Type.STATE and message_packet.category == Category.STATE):
-                    #     client_socket.close()
+                    elif (message_packet.type == Type.STATE and message_packet.category == Category.STATE):
+                        server.clients[0].close()
                     # repeat the loop
                     else:
                         continue
@@ -66,12 +66,9 @@ def serverON(server: TCP):
                 received_packet: Packet = server.receive_packet(client_socket)
 
                 # repeat loop until packet is received
-                # if received_packet is None:
-                #     continue
+                if received_packet is None:
+                    continue
                 
-                if not received_packet:
-                    print(f"Client {addr} disconnected or sent an empty packet")
-                    break  # If no packet is received, assume client disconnected
                 
                 # Handle packet based on its type and category
 
@@ -131,7 +128,7 @@ def serverON(server: TCP):
                     message_info: str = received_packet.command.split()
                     user = message_info[0]
                     chat = message_info[1]
-                    message: chatLogs.Message = chatLogs.Message(date=datetime.datetime.now().strftime('%Y-%m-%d %H:%M'), user=user, message=chat)
+                    message: chatLogs.Message = chatLogs.Message(datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'), user=user, message=chat)
                     chatLogs.insertMessage(message=message)
                     
                 
