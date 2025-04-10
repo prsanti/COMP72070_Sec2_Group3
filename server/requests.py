@@ -1,9 +1,10 @@
 from connection import TCP, Packet
 from connection.types import Type, Category
-from database import users, database
+from database import users, database, chatLogs
 from database.users import User
 from game import tictactoe
 import sqlite3
+import datetime
 
 
 def login_request(received_packet: Packet, addr, client_socket, server: TCP):
@@ -56,7 +57,13 @@ def ttt_request(received_packet: Packet, addr, client_socket, server: TCP):
     move_packet: Packet = Packet(addr, type=Type.GAME, category=Category.TICTACTOE, command=move)
     server.send_packet(client_socket=client_socket, packet=move_packet)
 
-
+def chat_request(received_packet: Packet):
+    print("Chat received from client")
+    message_info: str = received_packet.command.split()
+    user = message_info[0]
+    chat = " ".join(message_info[1:])
+    message: chatLogs.Message = chatLogs.Message(datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'), user=user, message=chat)
+    chatLogs.insertMessage(message=message)
     
 
         

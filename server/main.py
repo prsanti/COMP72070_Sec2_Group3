@@ -67,9 +67,9 @@ def serverON(server: TCP):
                 # Receive the next packet from the client
                 received_packet: Packet = server.receive_packet(client_socket)
 
-                # repeat loop until packet is received
-                if received_packet is None:
-                    continue
+                # # repeat loop until packet is received
+                # if received_packet is None:
+                #     continue
                 
                 
                 # Handle packet based on its type and category
@@ -126,12 +126,7 @@ def serverON(server: TCP):
 
                 # chat packet
                 elif received_packet.type == Type.CHAT:
-                    print("Chat received from client")
-                    message_info: str = received_packet.command.split()
-                    user = message_info[0]
-                    chat = message_info[1]
-                    message: chatLogs.Message = chatLogs.Message(datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'), user=user, message=chat)
-                    chatLogs.insertMessage(message=message)
+                    requests.chat_request(received_packet=received_packet)
                     
                 
                 # Send win image
@@ -228,7 +223,7 @@ if __name__ == '__main__':
     
     # Server code - comment out to run tests
     print("Setting up the database...")
-    database.setup_database()  # 🛠 Ensure tables are created
+    database.setup_database()
     print("Database setup complete.")
 
     try:
@@ -237,7 +232,7 @@ if __name__ == '__main__':
         server_thread.start()
 
         print("Loading initial data...")
-        from gui import server_ui  # 🛠 Import after database setup
+        from gui import server_ui
         print("Initial data loaded successfully.")
 
         ui.run(reload=False, port=8081)  # Changed port to 8081
