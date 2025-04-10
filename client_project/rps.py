@@ -54,7 +54,7 @@ class RockPaperScissors(ttk.Frame):
         )
         self.scissors_btn.pack(pady=10)
         
-        # Image frame to help center the image
+        # Image frame
         self.image_frame = ttk.Frame(self)
         self.image_frame.pack(expand=True, fill='both')
 
