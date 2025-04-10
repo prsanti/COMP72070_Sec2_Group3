@@ -52,7 +52,7 @@ def serverON(server: TCP):
                         server.send_packet(client_socket=client_socket, packet=message_packet)
                     elif (message_packet.type == Type.STATE and message_packet.category == Category.STATE):
                         # server.clients[0].close()
-                        print("hello")
+                        print("")
                     # repeat the loop
                     else:
                         continue
