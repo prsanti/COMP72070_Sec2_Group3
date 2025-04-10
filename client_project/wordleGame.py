@@ -16,6 +16,14 @@ class WordleGame(ttk.Frame):
 
         self.target_word = self.get_word_from_server()
 
+        # Image frame
+        self.image_frame = ttk.Frame(self)
+        self.image_frame.pack(expand=True, fill='both')
+
+        self.image_label = tk.Label(self.image_frame)
+        self.image_label.pack()
+        self.image_frame.pack_forget()  # Hide initially
+
         self.guesses = []
         self.current_row = 0
         self.current_col = 0
@@ -124,12 +132,17 @@ class WordleGame(ttk.Frame):
 
         if img_packet.type == Type.IMG:
             try:
+                # hide board
+                self.grid_frame.pack_forget()
 
                 # Load and update image
                 image = Image.open(io.BytesIO(img_packet.command))
-                image = image.resize((400, 400))
+                image = image.resize((600, 600))
                 self.image_tk = ImageTk.PhotoImage(image)
+
+                # Show image in the center
                 self.image_label.configure(image=self.image_tk)
-                self.image_label.pack(pady=10)
+                self.image_frame.pack(expand=True, fill='both')
+                self.image_label.pack(expand=True)  # Center vertically and horizontally
             except Exception as e:
                 print(f"Error displaying image: {e}")
