@@ -12,6 +12,7 @@ from wordleGame import WordleGame
 import socket
 from connection import Packet
 from connection.types import Type, Category
+import config
 
 HOST = "127.0.0.1"
 PORT = 27000
@@ -21,6 +22,7 @@ client_queue = SingletonQueue("client_queue")
 
 from login import LoginPage
 from game_selection import GameSelection
+
 
 class MainApplication(tk.Tk):
     def __init__(self):
@@ -83,7 +85,7 @@ class MainApplication(tk.Tk):
         message = self.chat_entry.get().strip()
         if message and self.tcp_client:
             # Create chat packet
-            chat_packet = Packet((HOST, PORT), type=Type.CHAT, category=Category.CHAT, command=message)
+            chat_packet = Packet((HOST, PORT), type=Type.CHAT, category=Category.CHAT, command=f"{config.username} {message}")
             # add chat to ui
             self.display_chat_message(f"Client: {chat_packet.command}")
             # add packet to queue

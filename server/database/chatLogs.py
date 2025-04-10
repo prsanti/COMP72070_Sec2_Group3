@@ -1,41 +1,43 @@
 import datetime
 import sqlite3
 from database.users import User
-server_start_time = datetime.datetime.now()
+server_start_time = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
 
 class Message:
 
     date: datetime
-    userID: int = None
+    user: str = None
     message: str = None
 
-    def __init__(self, date: datetime, user: User, message: str):
+    def __init__(self, date: datetime, user: str, message: str):
         self.date = date
-        self.userID = user.userID
+        self.user = user
         self.message = message
 
 def createChatTable(cursor):
     cursor.execute('''
     CREATE TABLE IF NOT EXISTS messages (
         messageID INTEGER PRIMARY KEY AUTOINCREMENT,
-        userID INTEGER NOT NULL,
+        user TEXT NOT NULL,
         message TEXT NOT NULL,
-        date TEXT NOT NULL,
-        FOREIGN KEY (userID) REFERENCES users(UserID)
+        date TEXT NOT NULL
     );
     ''')
 
         
-def insertMessage(cursor: sqlite3.Cursor, message: Message, date: datetime):
+def insertMessage(message: Message):
+    from database.database import connectAndCreateCursor
+    connection, cursor = connectAndCreateCursor()
     cursor.execute('''
-    INSERT INTO messages (userID, message, date)
+    INSERT INTO messages (user, message, date)
     VALUES (?, ?, ?)
-    ''', (message.userID, message.message, message.date.isoformat()))
+    ''', (message.user, message.message, message.date))
     
-    cursor.connection.commit()
+    connection.commit()
+    connection.close()
 
 def getAllMessages(cursor: sqlite3.Cursor):
-    selectMessage = """SELECT * FROM messages"""
+    selectMessage = """SELECT date, user, message FROM messages"""
     
     cursor.execute(selectMessage)
     
@@ -46,6 +48,6 @@ def getAllMessages(cursor: sqlite3.Cursor):
 
 def getRecentMessages(cursor: sqlite3.Cursor):
     # Fetch only the messages that are considered "new" after server started
-    select_message = """SELECT * FROM messages WHERE date > ?"""  # Customize as needed (e.g., server start time)
+    select_message = """SELECT date, user, message FROM messages WHERE date > ?"""
     cursor.execute(select_message, (server_start_time,))
     return cursor.fetchall()
