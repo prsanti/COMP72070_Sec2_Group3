@@ -11,6 +11,7 @@ from coinFlip import CoinFlip
 from wordleGame import WordleGame
 import socket
 from connection import Packet
+from connection.types import Type, Category
 
 HOST = "127.0.0.1"
 PORT = 27000
@@ -25,7 +26,7 @@ class MainApplication(tk.Tk):
     def __init__(self):
         super().__init__()
         self.title("Game Client")
-        self.geometry("800x600")
+        self.geometry("800x800")
         self.configure(bg="#E6F3FF")  # Pastel blue background
 
         # Configure styles
@@ -51,6 +52,19 @@ class MainApplication(tk.Tk):
         
         # Create chat frame (initially hidden)
         self.chat_frame = ttk.Frame(self.container, style="TFrame")
+
+        # Chat message display
+        self.chat_display = tk.Text(
+            self.chat_frame,
+            height=10,
+            state="disabled",
+            wrap="word",
+            bg="#FFFFFF",
+            borderwidth=2,
+            relief="groove",
+            font=("Consolas", 12)
+        )
+        self.chat_display.pack(side="top", fill="x", pady=(0, 5))
         
         # Chat input
         self.chat_entry = ttk.Entry(self.chat_frame, style="TEntry", width=25)
@@ -62,28 +76,32 @@ class MainApplication(tk.Tk):
 
         self.show_login_page()
 
+        # load chat messages
+        self.after(100, self.process_chat_packets)
+
     def send_chat_message(self, event=None):
         message = self.chat_entry.get().strip()
         if message and self.tcp_client:
             # Create chat packet
-            packet = Packet(
-                type=Type.CHAT,
-                category=Category.CHAT,
-                client=self.tcp_client.client_id,
-                command=message
-            )
-            connection_queue.put(packet)
+            chat_packet = Packet((HOST, PORT), type=Type.CHAT, category=Category.CHAT, command=message)
+            # add chat to ui
+            self.display_chat_message(f"Client: {chat_packet.command}")
+            # add packet to queue
+            connection_queue.put(chat_packet)
             self.chat_entry.delete(0, tk.END)
 
     def show_login_page(self):
-        self.chat_frame.place_forget()  # Hide chat on login screen
+        self.chat_frame.pack_forget()  # Hide chat on login screen
         self.login_page = LoginPage(self, self.on_login_success)
         self.login_page.pack(expand=True, fill="both")
 
     def on_login_success(self, tcp_client):
         self.tcp_client = tcp_client
         self.login_page.pack_forget()
-        self.chat_frame.place(relx=1.0, rely=1.0, anchor="se", x=-10, y=-10)  # Show chat after login
+
+        # enable chat window
+        self.chat_frame.pack(side="bottom", fill="x", padx=10, pady=10)
+
         self.game_selection = GameSelection(self, tcp_client)
         self.game_selection.pack(expand=True, fill="both")
 
@@ -91,7 +109,7 @@ class MainApplication(tk.Tk):
         for widget in self.winfo_children():
             if isinstance(widget, (TicTacToe, WordleGame, CoinFlip)):
                 widget.destroy()
-        self.chat_frame.place(relx=1.0, rely=1.0, anchor="se", x=-10, y=-10)  # Keep chat visible when switching games
+        self.chat_frame.pack(side="bottom", fill="x", padx=10, pady=10)  # Keep chat visible when switching games
 
     def show_game_selection(self):
         # Clear any existing game frames
@@ -119,6 +137,21 @@ class MainApplication(tk.Tk):
         game = CoinFlip(self, self.show_game_selection, self.tcp_client)
         game.pack(expand=True, fill="both")
 
+    def display_chat_message(self, message):
+        self.chat_display.config(state="normal")
+        self.chat_display.insert(tk.END, message + "\n")
+        self.chat_display.config(state="disabled")
+        self.chat_display.see(tk.END)
+
+    def process_chat_packets(self):
+        try:
+            while True:
+                packet = client_queue.get_nowait()
+                if packet.type == Type.CHAT:
+                    self.display_chat_message(f"{packet.client}: {packet.command}")
+        except queue.Empty:
+            pass
+        self.after(100, self.process_chat_packets)
 
 def handle_socket_connection():
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
@@ -128,7 +161,7 @@ def handle_socket_connection():
 
         while True:
             try:
-                buffer = client.receive_packet(s)
+                buffer : Packet = client.receive_packet(s)
                 if buffer:
                     print(f"Received packet from server: {buffer.client}, Command: {buffer.command}")
                     # Put the received packet into the queue for the main thread to process
@@ -137,7 +170,6 @@ def handle_socket_connection():
                 pass  # No data available, move on
 
             try:
-
                 packet = connection_queue.get(timeout=1.0) 
                 print(f"Dequeued packet: {packet}")
                 client.send_packet(s, packet=packet)

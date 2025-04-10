@@ -18,9 +18,14 @@ from database.users import User
 from game import rps
 import requests
 import random
+import queue
+from connection.queue import SingletonQueue
+# global queue variable
+connection_queue = SingletonQueue("connection_queue")
 
 def serverON(server: TCP):
     server.state = State.WAITINGFORCONNECTION
+
     client_socket, addr = server.accept_client()
 
     if client_socket:
@@ -35,8 +40,24 @@ def serverON(server: TCP):
         # Process packets continuously until the client disconnects
         while True:
             try:
+                # Get mesage from Queue
+                message_packet : Packet = connection_queue.get(timeout=1.0)
+                if (message_packet):
+                    # send message packet to client
+                    server.send_packet(client_socket=client_socket, packet=message_packet)
+                    # repeat the loop
+                    continue
+            except queue.Empty:
+                # print("No Message in Queue")
+                # repeat loop if empty
+                None
+            try:
                 # Receive the next packet from the client
                 received_packet: Packet = server.receive_packet(client_socket)
+
+                # repeat loop until packet is received
+                if received_packet is None:
+                    continue
                 
                 if not received_packet:
                     print(f"Client {addr} disconnected or sent an empty packet")
@@ -69,7 +90,7 @@ def serverON(server: TCP):
 
                 elif received_packet.type == Type.GAME and received_packet.category == [Category.WIN, Category.LOSE, Category.DRAW]:
                     server.state = State.CONNECTED
-                
+
                 # login packet
                 elif received_packet.type == Type.LOGIN and received_packet.category == Category.LOGIN:
                     requests.login_request(received_packet=received_packet, addr=addr, client_socket=client_socket, server=server)
@@ -88,6 +109,9 @@ def serverON(server: TCP):
                     move = rps.getRPS()
                     rps_packet: Packet = Packet(addr, Type.GAME, Category.RPS, command=move)
                     server.send_packet(client_socket=client_socket, packet=rps_packet)
+
+                elif received_packet.type == Type.CHAT:
+                    print("Chat received from client")
                 
                 # Send win image
                 # elif received_packet.type == Type.GAME and received_packet.category == Category.WIN:
@@ -102,6 +126,9 @@ def serverON(server: TCP):
             except Exception as e:
                 print(f"Error while processing packet: {e}")
                 break  # If an error occurs, break out of the loop
+            except BlockingIOError:
+                pass
+
 
         # Close the connection after the loop ends (client disconnected)
         client_socket.close()
@@ -137,13 +164,13 @@ def start_tcp_server():
 
 if __name__ == '__main__':
     # Create a test suite for classes
-    # suite = unittest.TestSuite()
-    # suite.addTests(unittest.TestLoader().loadTestsFromTestCase(TestPacket))
-    # suite.addTests(unittest.TestLoader().loadTestsFromTestCase(TestTCP))
+    suite = unittest.TestSuite()
+    suite.addTests(unittest.TestLoader().loadTestsFromTestCase(TestPacket))
+    suite.addTests(unittest.TestLoader().loadTestsFromTestCase(TestTCP))
     
-    # # Run tests
-    # print("Running all tests...")
-    # unittest.TextTestRunner(verbosity=2).run(suite)
+    # Run tests
+    print("Running all tests...")
+    unittest.TextTestRunner(verbosity=2).run(suite)
     
     # Server code - comment out to run tests
     print("Setting up the database...")
