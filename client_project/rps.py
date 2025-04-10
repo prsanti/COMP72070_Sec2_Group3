@@ -3,7 +3,6 @@ from tkinter import ttk, messagebox
 from connection.packet import Packet, Type, Category
 from PIL import Image, ImageTk
 import io
-import zlib
 
 class RockPaperScissors(ttk.Frame):
     def __init__(self, parent, tcp_client, main_menu_callback):
@@ -99,12 +98,8 @@ class RockPaperScissors(ttk.Frame):
                     self.paper_btn.pack_forget()
                     self.scissors_btn.pack_forget()
 
-                    # Decompress image bytes from server
-                    decompressed_bytes = zlib.decompress(response.command)
-
-
                     # Load and update image
-                    image = Image.open(io.BytesIO(decompressed_bytes))
+                    image = Image.open(io.BytesIO(response.command))
                     image = image.resize((400, 400))
                     self.image_tk = ImageTk.PhotoImage(image)
                     self.image_label.configure(image=self.image_tk)
