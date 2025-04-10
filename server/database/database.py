@@ -5,21 +5,25 @@ from .users import createUserTable
 from .packets import createPacketTable, creatSentPacketTable
 from .chatLogs import createChatTable
 
+
 dbPath = "serverData"
 
 listOfTables = ["users", "wordle", "chatlogs", "packets"]
 
 def setup_database():
+    from .state import create_state_table
     connection = sqlite3.connect(dbPath)
     cursor = connection.cursor()
     cursor.execute("PRAGMA journal_mode=WAL;")  # Enables write-ahead logging
     dropTable(cursor=cursor, table="packets")
     dropTable(cursor=cursor, table="SentPackets")
+    #dropTable(cursor=cursor, table="messages")
     createWordleTable(cursor=cursor)
     createUserTable(cursor=cursor)
     createChatTable(cursor=cursor)
     createPacketTable(cursor=cursor)
     creatSentPacketTable(cursor=cursor)
+    create_state_table(cursor=cursor)
 
     connection.commit()
     connection.close()

@@ -32,6 +32,8 @@ class LoginPage(tk.Frame):
     def login(self):
         from main import connection_queue
         from main import client_queue
+        import config
+
 
 
         username = self.username_entry.get()
@@ -64,6 +66,7 @@ class LoginPage(tk.Frame):
 
         if (response.command == "True"):
             print("login successful")
+            config.username = username
             self.on_login_success(True)
         else:
             messagebox.showerror("Error", "Login failed")

@@ -6,36 +6,38 @@ server_start_time = datetime.datetime.now()
 class Message:
 
     date: datetime
-    userID: int = None
+    user: str = None
     message: str = None
 
-    def __init__(self, date: datetime, user: User, message: str):
+    def __init__(self, date: datetime, user: str, message: str):
         self.date = date
-        self.userID = user.userID
+        self.user = user
         self.message = message
 
 def createChatTable(cursor):
     cursor.execute('''
     CREATE TABLE IF NOT EXISTS messages (
         messageID INTEGER PRIMARY KEY AUTOINCREMENT,
-        userID INTEGER NOT NULL,
+        user TEXT NOT NULL,
         message TEXT NOT NULL,
-        date TEXT NOT NULL,
-        FOREIGN KEY (userID) REFERENCES users(UserID)
+        date TEXT NOT NULL
     );
     ''')
 
         
-def insertMessage(cursor: sqlite3.Cursor, message: Message, date: datetime):
+def insertMessage(message: Message):
+    from database.database import connectAndCreateCursor
+    connection, cursor = connectAndCreateCursor()
     cursor.execute('''
-    INSERT INTO messages (userID, message, date)
+    INSERT INTO messages (user, message, date)
     VALUES (?, ?, ?)
-    ''', (message.userID, message.message, message.date.isoformat()))
+    ''', (message.user, message.message, message.date))
     
-    cursor.connection.commit()
+    connection.commit()
+    connection.close()
 
 def getAllMessages(cursor: sqlite3.Cursor):
-    selectMessage = """SELECT * FROM messages"""
+    selectMessage = """SELECT date, user, message FROM messages"""
     
     cursor.execute(selectMessage)
     

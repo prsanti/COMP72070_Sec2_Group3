@@ -1,10 +1,14 @@
 from nicegui import ui
-from database import wordle, chatLogs, users, packets
+from database import wordle, chatLogs, users, packets, state
+from database.packets import Packet
+from connection.types import Type, Category
 from database import database
 from chat import chat
+from database.chatLogs import Message
+import datetime
 
 # hard coded data for visuals
-connected_clients = ["Client 1 - User1 - Playing tictactoe", "Client 2 - User2 - Playing tictactoe"]
+connected_clients = ["Client"]
 chat_logs = []  # All chat history (from the database)
 current_chat_logs = []  # Only new chat logs added after server start
 wordle_list = []
@@ -38,25 +42,30 @@ def get_updated_data():
     update_chat_display()
     update_database_info_display()
     update_packet_display()
-    update_sent_packet_display()
-    # update_state_label()
+    update_sent_packet_display()    
+    update_state_label()
 
-# def update_state_label():
-#     from global_server import global_server
-#     # global server_state_label
-
-#     if server_state_label:
-#         if global_server and global_server.state:
-#             server_state_label.text = f"Current state: {global_server.state.name}"
-#         else:
-#             server_state_label.text = "Current state: Not connected"
+def update_state_label():
+    server_state_label.text = state.get_newest_state()
 
 
 def update_chat_display():
+    # Update full chat history
+    chat_display.clear()
+    with chat_display:
+        for date, user, message in chat_logs:
+            ui.label(date)
+            ui.label(user)
+            ui.label(message)
+
+    # Update only recent chat logs
     current_chat_log_container.clear()
     with current_chat_log_container:
-        for log in current_chat_logs:
-            ui.label(log)
+        for date, user, message in current_chat_logs:
+            ui.label(date)
+            ui.label(user)
+            ui.label(message)
+
 
 def update_database_info_display():
     database_info_container.clear()
@@ -102,13 +111,15 @@ def send_message(value):
     # send message from server to client
     chat.sendMessageToClient(value)
 
-    # Display the updated current chat logs
-    current_chat_log_container.clear()
-    with current_chat_log_container:
-        for log in current_chat_logs:
-            ui.label(log)
+    message: Message = Message(datetime.datetime.now().strftime('%Y-%m-%d %H:%M'), "server", value)
+    chatLogs.insertMessage(message=message)
 
     get_updated_data()
+
+def disconnect_user():
+    from main import connection_queue
+    disconnect_packet: Packet = Packet(client="", type=Type.STATE, category=Category.STATE, command="")
+    connection_queue.put(disconnect_packet)
 
 # Load initial data when the app starts
 load_initial_data()
@@ -120,18 +131,12 @@ with ui.row().style("width: 100%; justify-content: space-around;"):
 
 with ui.row().style("width: 100%; height: 100%; gap: 20px;"):
     with ui.column().style("flex: 1;"):
-        with ui.card().style("width: 100%;"):
-            ui.label("Connected clients:")
-            client_list = ui.column()
-            for i, client in enumerate(connected_clients):
-                with ui.row():
-                    ui.label(client)
-                    ui.button("Disconnect")
 
         with ui.card().style("width: 100%;"):
             ui.label("Server State:")
             # dynamic label updates on global server state
-            ui.label("Waiting for server...").style("font-weight: bold; font-size: 16px;")
+            server_state_label = ui.label(state.get_newest_state()).style("font-weight: bold; font-size: 16px;")
+
 
         with ui.card().style("width: 100%;"):
             ui.label("Packets").style("font-weight: bold; font-size: 18px; margin-bottom: 10px;")
@@ -169,8 +174,8 @@ with ui.row().style("width: 100%; height: 100%; gap: 20px;"):
             # Scroll area for sent packet rows
             with ui.scroll_area().classes('w-100 h-40 border'):
                 sent_packet_display = ui.grid(columns=5).classes('w-full')
+                sent_packet_display.clear()
                 for packet_id, client, type, category, command in sent_packet_list:
-                    sent_packet_display.clear()
                     with sent_packet_display:
                         ui.label(str(packet_id))
                         ui.label(client)
@@ -180,6 +185,14 @@ with ui.row().style("width: 100%; height: 100%; gap: 20px;"):
 
 
     with ui.column().style("flex: 1;"):
+        with ui.card().style("width: 100%;"):
+            ui.label("Connected clients:")
+            client_list = ui.column()
+            
+            with ui.row():
+                ui.label("client")
+                ui.button("Disconnect")
+
         # Database Info Card
         with ui.card().style("width: 100%;"):
             ui.label("Database Information:").style("font-weight: bold; margin-bottom: 10px;")
@@ -210,17 +223,31 @@ with ui.row().style("width: 100%; height: 100%; gap: 20px;"):
 
     with ui.column().style("flex: 1;"):
         with ui.card().style("width: 100%;"):
-            ui.label("All Chat History")
-            with ui.row().style("flex: 1"):
-                for log in chat_logs:
-                    ui.label(log)
+            ui.label("All Chat History").style("font-weight: bold; font-size: 18px; margin-bottom: 10px;")
+
+            # Grid header for packets
+            with ui.grid(columns=3).style("font-weight: bold; width: 100%;"):
+                ui.label("Date/Time")
+                ui.label("User")
+                ui.label("Message")
+            with ui.scroll_area().classes('w-100 h-40 border'):
+                chat_display = ui.grid(columns=3).classes('w-full')
+                
 
             message_input = ui.input(placeholder="Send message to all users:").props('clearable')
             ui.button("Send", on_click=lambda: send_message(message_input.value))
 
         with ui.card().style("width: 100%;"):
-            ui.label("Current Chat Logs:")
-            current_chat_log_container = ui.column()
+            ui.label("Current Chat Logs").style("font-weight: bold; font-size: 18px; margin-bottom: 10px;")
+
+            # Grid header for packets
+            with ui.grid(columns=3).style("font-weight: bold; width: 100%;"):
+                ui.label("Date/Time")
+                ui.label("User")
+                ui.label("Message")
+            with ui.scroll_area().classes('w-100 h-40 border'):
+                current_chat_log_container = ui.grid(columns=3).classes('w-full')
+                update_chat_display()
             update_chat_display()
 
 #update the ui every 5 seconds
