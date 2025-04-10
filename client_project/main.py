@@ -87,7 +87,8 @@ class MainApplication(tk.Tk):
             # Create chat packet
             chat_packet = Packet((HOST, PORT), type=Type.CHAT, category=Category.CHAT, command=f"{config.username} {message}")
             # add chat to ui
-            self.display_chat_message(f"Client: {chat_packet.command}")
+            parts = chat_packet.command.split(' ', 1)
+            self.display_chat_message(f"{parts[0]}: {parts[1]}")
             # add packet to queue
             connection_queue.put(chat_packet)
             self.chat_entry.delete(0, tk.END)
