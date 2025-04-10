@@ -130,13 +130,16 @@ class TCP:
             return None, None
 
     def send_packet(self, client_socket, packet):
+        from .types import Type
         """Send a Packet object to the connected client with a length header."""
         try:
             serialized_packet = packet.serialize()
             length_header = struct.pack('!I', len(serialized_packet))  # 4-byte length header
             client_socket.sendall(length_header + serialized_packet)
-            packets.addSentPacketToTable(packet=packet)
-            print(f"Sent Packet: {packet.__dict__}")
+            if packet.type is not Type.IMG:
+                packets.addSentPacketToTable(packet=packet)
+                print(f"Sent Packet: {packet.__dict__}")
+
         except socket.error as e:
             print(f"Error sending packet: {e}")
 
