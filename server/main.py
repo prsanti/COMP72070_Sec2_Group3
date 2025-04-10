@@ -20,6 +20,7 @@ import requests
 import random
 import queue
 from connection.queue import SingletonQueue
+
 # global queue variable
 connection_queue = SingletonQueue("connection_queue")
 
@@ -114,10 +115,37 @@ def serverON(server: TCP):
                     print("Chat received from client")
                 
                 # Send win image
-                # elif received_packet.type == Type.GAME and received_packet.category == Category.WIN:
-                #     win_image = ""  # Placeholder for the actual win image
-                #     win_packet: Packet = Packet(addr, Type.IMG, None, command=win_image)
-                #     server.send_packet(client_socket=client_socket, packet=win_packet)
+                elif received_packet.type == Type.IMG and received_packet.category == Category.WIN:
+                    # print("Client won")
+                    image = "images/youWin.jpg"
+                    image_bytes = readJpeg(image)
+
+                    # Create packet with image data
+                    image_packet = Packet(client="server", type=Type.IMG, category=Category.WIN, command=image_bytes)
+                    # win_packet: Packet = Packet(addr, Type.IMG, None, command=win_image)
+                    server.send_packet(client_socket=client_socket, packet=image_packet)
+
+                # Send lose image
+                elif received_packet.type == Type.IMG and received_packet.category == Category.LOSE:
+                    # print("Client lost")
+                    image = "images/youLose.jpg"
+                    image_bytes = readJpeg(image)
+
+                    # Create packet with image data
+                    image_packet = Packet(client="server", type=Type.IMG, category=Category.LOSE, command=image_bytes)
+                    # win_packet: Packet = Packet(addr, Type.IMG, None, command=win_image)
+                    server.send_packet(client_socket=client_socket, packet=image_packet)
+
+                # Send tie image
+                elif received_packet.type == Type.IMG and received_packet.category == Category.DRAW:
+                    # print("Client tie")
+                    image = "images/youTie.jpg"
+                    image_bytes = readJpeg(image)
+
+                    # Create packet with image data
+                    image_packet = Packet(client="server", type=Type.IMG, category=Category.DRAW, command=image_bytes)
+                    # win_packet: Packet = Packet(addr, Type.IMG, None, command=win_image)
+                    server.send_packet(client_socket=client_socket, packet=image_packet)
                 
 
 
@@ -160,7 +188,13 @@ def start_tcp_server():
     while True:
         serverON(server= server)
 
+# read jpeg
+def readJpeg(filename : str):
+    # read file as binary
+    with open(filename, "rb") as f:
+        image_bytes = f.read()
 
+    return image_bytes
 
 if __name__ == '__main__':
     # Create a test suite for classes

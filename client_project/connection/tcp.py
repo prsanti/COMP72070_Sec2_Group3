@@ -1,6 +1,7 @@
 import socket
 import pickle
 from .packet import Packet
+import struct
 
 HOST = "127.0.0.1"
 PORT = 27000
@@ -48,19 +49,31 @@ class TCP:
 
     def receive_packet(self, client_socket):
         """Receive a Packet object from the client."""
-        try:
-            data = client_socket.recv(4096)  # Receive a larger buffer
-            if data:
-                packet = Packet.deserialize(data)
-                print(f"Received Packet: {packet.__dict__}")
-                return packet
-            else:
-                print("Client disconnected.")
-                client_socket.close()
-        except BlockingIOError:
+        def recvall(n):
+            # get data in bytes
+            data = b''
+            # read 4 bytes of header
+            while len(data) < n:
+                packet = client_socket.recv(n - len(data))
+                if not packet:
+                    return None
+                data += packet
+            return data
+
+        # read 4 bytes of header
+        raw_length = recvall(4)
+        if not raw_length:
             return None
-        except socket.error as e:
-            print(f"Error receiving packet: {e}")
+
+        # use struct to unpack <=1mb of data
+        message_length = struct.unpack('!I', raw_length)[0]
+
+        # Read the full message
+        data = recvall(message_length)
+        if not data:
+            return None
+
+        return pickle.loads(data)
 
     def close(self):
         """Close all client connections and the server socket."""
