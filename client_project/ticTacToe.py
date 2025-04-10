@@ -1,6 +1,9 @@
 import tkinter as tk
 from tkinter import ttk, messagebox
 from connection.packet import Packet, Type, Category
+from PIL import Image, ImageTk
+import io
+import time
 
 class TicTacToe(ttk.Frame):
     def __init__(self, parent, tcp_client, main_menu_callback):
@@ -51,15 +54,19 @@ class TicTacToe(ttk.Frame):
             # Check for winner or tie
             if self.check_winner():
                 messagebox.showinfo("Game Over", "You win!")
-                win_packet: Packet = Packet((HOST, PORT), type=Type.GAME, category=Category.WIN, command="player wins tictactoe")
+                win_packet: Packet = Packet((HOST, PORT), type=Type.IMG, category=Category.WIN, command="player wins tictactoe")
                 connection_queue.put(win_packet, block=False)
-                self.reset_game()
+
+                self.get_image()
+
+                #self.reset_game()
                 return
             elif "" not in self.board:
                 messagebox.showinfo("Game Over", "It's a tie!")
-                draw_packet: Packet = Packet(('127.0.0.1', 59386), type=Type.GAME, category=Category.DRAW, command="player ties in tictactoe")
+                draw_packet: Packet = Packet(('127.0.0.1', 59386), type=Type.IMG, category=Category.DRAW, command="player ties in tictactoe")
                 connection_queue.put(draw_packet, block=False)
-                self.reset_game()
+                self.get_image()
+                #self.reset_game()
                 return
 
             # Send the updated board to the server
@@ -89,28 +96,31 @@ class TicTacToe(ttk.Frame):
 
             if self.check_winner():
                 messagebox.showinfo("Game Over", "Computer wins!")
-                lose_packet: Packet = Packet(('127.0.0.1', 59386), type=Type.GAME, category=Category.LOSE, command="player loses tictactoe")
+                lose_packet: Packet = Packet(('127.0.0.1', 59386), type=Type.IMG, category=Category.LOSE, command="player loses tictactoe")
                 connection_queue.put(lose_packet, block=False)
-                self.reset_game()
+                self.get_image()
+                #self.reset_game()
                 return
             elif "" not in self.board:
                 messagebox.showinfo("Game Over", "It's a tie!")
-                draw_packet: Packet = Packet(('127.0.0.1', 59386), type=Type.GAME, category=Category.DRAW, command="player ties in tictactoe")
+                draw_packet: Packet = Packet(('127.0.0.1', 59386), type=Type.IMG, category=Category.DRAW, command="player ties in tictactoe")
                 connection_queue.put(draw_packet, block=False)
-                self.reset_game()
+                time.sleep(1)
+                self.get_image()
+                #self.reset_game()
                 return
 
         self.current_player = "X"
 
-    def find_winning_move(self, player):
-        for i in range(9):
-            if self.board[i] == "":
-                self.board[i] = player
-                if self.check_winner():
-                    self.board[i] = ""
-                    return i
-                self.board[i] = ""
-        return None
+    # def find_winning_move(self, player):
+    #     for i in range(9):
+    #         if self.board[i] == "":
+    #             self.board[i] = player
+    #             if self.check_winner():
+    #                 self.board[i] = ""
+    #                 return i
+    #             self.board[i] = ""
+    #     return None
 
     def check_winner(self):
         win_conditions = [
@@ -120,44 +130,54 @@ class TicTacToe(ttk.Frame):
         ]
         for condition in win_conditions:
             if self.board[condition[0]] == self.board[condition[1]] == self.board[condition[2]] != "":
-                winner = self.board[condition[0]]
-                if winner == "X":
-                    self.request_result_image('win')
-                else:
-                    self.request_result_image('lose')
                 return True
         if "" not in self.board:
-            self.request_result_image('draw')
             return False
         return False
 
-    def request_result_image(self, result_type):
-        if self.tcp_client:
-            try:
-                self.tcp_client.send_game_move("tictactoe", {
-                    'request_type': 'result_image',
-                    'result': result_type
-                })
-            except Exception as e:
-                print(f"Failed to request image: {e}")
+    # def request_result_image(self, result_type):
+    #     if self.tcp_client:
+    #         try:
+    #             self.tcp_client.send_game_move("tictactoe", {
+    #                 'request_type': 'result_image',
+    #                 'result': result_type
+    #             })
+    #         except Exception as e:
+    #             print(f"Failed to request image: {e}")
 
-    def display_result_image(self, image_data):
-        try:
-            if not hasattr(self, 'image_frame'):
-                self.image_frame = ttk.Frame(self)
-                self.image_frame.pack(pady=10)
-                self.image_label = ttk.Label(self.image_frame)
-                self.image_label.pack()
+    # def display_result_image(self, image_data):
+    #     try:
+    #         if not hasattr(self, 'image_frame'):
+    #             self.image_frame = ttk.Frame(self)
+    #             self.image_frame.pack(pady=10)
+    #             self.image_label = ttk.Label(self.image_frame)
+    #             self.image_label.pack()
 
-            photo_image = self.tcp_client.receive_game_result_image(image_data)
-            if photo_image:
-                self.image_label.configure(image=photo_image)
-                self.image_label.image = photo_image
-        except Exception as e:
-            print(f"Error displaying image: {e}")
+    #         photo_image = self.tcp_client.receive_game_result_image(image_data)
+    #         if photo_image:
+    #             self.image_label.configure(image=photo_image)
+    #             self.image_label.image = photo_image
+    #     except Exception as e:
+    #         print(f"Error displaying image: {e}")
 
     def reset_game(self):
         self.board = [""] * 9
         self.current_player = "X"
         for button in self.buttons:
             button.config(text="", style="Grid.TButton")
+
+    def get_image(self):
+        from main import client_queue
+        img_packet:Packet = client_queue.get()
+
+        if img_packet.type == Type.IMG:
+            try:
+
+                # Load and update image
+                image = Image.open(io.BytesIO(img_packet.command))
+                image = image.resize((400, 400))
+                self.image_tk = ImageTk.PhotoImage(image)
+                self.image_label.configure(image=self.image_tk)
+                self.image_label.pack(pady=10)
+            except Exception as e:
+                print(f"Error displaying image: {e}")

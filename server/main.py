@@ -46,13 +46,14 @@ def serverON(server: TCP):
             try:
                 # Get mesage from Queue
                 message_packet : Packet = connection_queue.get(timeout=1.0)
+                print(f"Received packet from queue: {message_packet}")
                 if (message_packet):
                     # send message packet to client
                     if (message_packet.type == Type.CHAT):
                         server.send_packet(client_socket=client_socket, packet=message_packet)
                     elif (message_packet.type == Type.STATE and message_packet.category == Category.STATE):
-                        # server.clients[0].close()
-                        print("")
+                        print(f"Command in packet: {message_packet.command}")
+                        server.clients[0].close()
                     # repeat the loop
                     else:
                         continue

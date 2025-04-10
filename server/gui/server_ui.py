@@ -117,8 +117,9 @@ def send_message(value):
     get_updated_data()
 
 def disconnect_user():
+    print("Disconnect user triggered") 
     from main import connection_queue
-    disconnect_packet: Packet = Packet(client="1", type=Type.STATE, category=Category.STATE, command="1")
+    disconnect_packet: Packet = Packet(client="1", type=Type.STATE, category=Category.STATE, command="disconnect")
     connection_queue.put(disconnect_packet)
 
 # Load initial data when the app starts
@@ -191,7 +192,7 @@ with ui.row().style("width: 100%; height: 100%; gap: 20px;"):
             
             with ui.row():
                 ui.label("client")
-                ui.button("Disconnect", on_click= disconnect_user())
+                ui.button("Disconnect", on_click=disconnect_user)
 
         # Database Info Card
         with ui.card().style("width: 100%;"):
