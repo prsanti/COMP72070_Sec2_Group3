@@ -23,6 +23,11 @@ class TicTacToe(ttk.Frame):
         title_label = ttk.Label(self, text="Tic Tac Toe", font=("Arial", 24, "bold"))
         title_label.pack(pady=10)
 
+        # Image label (created but hidden initially)
+        self.image_label = tk.Label(self)
+        self.image_label.pack(pady=10)
+        self.image_label.pack_forget()  # Hide initially
+
         self.create_widgets()
 
     def create_widgets(self):

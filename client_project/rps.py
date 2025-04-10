@@ -54,10 +54,14 @@ class RockPaperScissors(ttk.Frame):
         )
         self.scissors_btn.pack(pady=10)
         
-        # Image label (created but hidden initially)
-        self.image_label = tk.Label(self)
-        self.image_label.pack(pady=10)
-        self.image_label.pack_forget()  # Hide initially
+        # Image frame to help center the image
+        self.image_frame = ttk.Frame(self)
+        self.image_frame.pack(expand=True, fill='both')
+
+        self.image_label = tk.Label(self.image_frame)
+        self.image_label.pack()
+        self.image_frame.pack_forget()  # Hide initially
+
 
         # Back button
         self.back_btn = ttk.Button(self, text="Main Menu", command=self.main_menu_callback)
@@ -97,13 +101,19 @@ class RockPaperScissors(ttk.Frame):
                     self.rock_btn.pack_forget()
                     self.paper_btn.pack_forget()
                     self.scissors_btn.pack_forget()
+                    self.button_frame.pack_forget()
 
                     # Load and update image
                     image = Image.open(io.BytesIO(response.command))
-                    image = image.resize((400, 400))
+                    image = image.resize((600, 600))
                     self.image_tk = ImageTk.PhotoImage(image)
+
+                    # Show image in the center
                     self.image_label.configure(image=self.image_tk)
-                    self.image_label.pack(pady=10)
+                    self.image_frame.pack(expand=True, fill='both')
+                    self.image_label.pack(expand=True)  # Center vertically and horizontally
+
+
                 except Exception as e:
                     print(f"Error displaying image: {e}")
                 break

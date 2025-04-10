@@ -58,7 +58,7 @@ class MainApplication(tk.Tk):
         # Chat message display
         self.chat_display = tk.Text(
             self.chat_frame,
-            height=10,
+            height=5,
             state="disabled",
             wrap="word",
             bg="#FFFFFF",
@@ -96,13 +96,14 @@ class MainApplication(tk.Tk):
         self.chat_frame.pack_forget()  # Hide chat on login screen
         self.login_page = LoginPage(self, self.on_login_success)
         self.login_page.pack(expand=True, fill="both")
+        # self.chat_frame.pack_forget()
 
     def on_login_success(self, tcp_client):
         self.tcp_client = tcp_client
         self.login_page.pack_forget()
 
         # enable chat window
-        self.chat_frame.pack(side="bottom", fill="x", padx=10, pady=10)
+        self.chat_frame.pack(side="bottom", fill="x", padx=10, pady=0)
 
         self.game_selection = GameSelection(self, tcp_client)
         self.game_selection.pack(expand=True, fill="both")

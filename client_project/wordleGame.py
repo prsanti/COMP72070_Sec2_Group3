@@ -16,6 +16,11 @@ class WordleGame(ttk.Frame):
 
         self.target_word = self.get_word_from_server()
 
+        # Image label (created but hidden initially)
+        self.image_label = tk.Label(self)
+        self.image_label.pack(pady=10)
+        self.image_label.pack_forget()  # Hide initially
+
         self.guesses = []
         self.current_row = 0
         self.current_col = 0
