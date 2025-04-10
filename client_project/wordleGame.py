@@ -2,6 +2,8 @@ import tkinter as tk
 from tkinter import ttk, messagebox
 import random
 from connection.packet import Packet, Type, Category
+from PIL import Image, ImageTk
+import io
 
 class WordleGame(ttk.Frame):
 
@@ -17,6 +19,11 @@ class WordleGame(ttk.Frame):
         self.current_row = 0
         self.current_col = 0
         self.create_widgets()
+
+        # Image label (created but hidden initially)
+        self.image_label = tk.Label(self)
+        self.image_label.pack(pady=10)
+        self.image_label.pack_forget()  # Hide initially
 
     def get_word_from_server(self):
         
@@ -76,6 +83,20 @@ class WordleGame(ttk.Frame):
             lbl = self.letter_labels[self.current_row][self.current_col]
             lbl.config(text="")
 
+    def showImage(self):
+        from main import client_queue
+        response = client_queue.get()
+
+        try:
+            # Load and update image
+            image = Image.open(io.BytesIO(response.command))
+            image = image.resize((400, 400))
+            self.image_tk = ImageTk.PhotoImage(image)
+            self.image_label.configure(image=self.image_tk)
+            self.image_label.pack(pady=10)
+        except Exception as e:
+            print(f"Error displaying image: {e}")
+
     def check_guess(self):
         from main import connection_queue, PORT
         """Check the current guess and update the grid."""
@@ -100,14 +121,20 @@ class WordleGame(ttk.Frame):
 
         if guess == self.target_word:
             messagebox.showinfo("Congratulations!", "You guessed the word!")
-            result_packet: Packet = Packet ('127.0.0.1', type=Type.GAME, category=Category.WIN, command=f"player guessed the correct word {self.target_word}")
+            # result_packet: Packet = Packet ('127.0.0.1', type=Type.GAME, category=Category.WIN, command=f"player guessed the correct word {self.target_word}")
+            # connection_queue.put(result_packet, block=False)
+            result_packet = Packet(('127.0.0.1'), type=Type.IMG, category=Category.WIN, command="")
             connection_queue.put(result_packet, block=False)
-            self.main_menu_callback()
+            self.showImage()
+            # self.main_menu_callback()
         elif self.current_row == 5:
             messagebox.showinfo("Game Over", f"The word was {self.target_word}")
-            result_packet: Packet = Packet (('127.0.0.1'), type=Type.GAME, category=Category.LOSE, command=f"Player loses. The word was {self.target_word}")
+            # result_packet: Packet = Packet (('127.0.0.1'), type=Type.GAME, category=Category.LOSE, command=f"Player loses. The word was {self.target_word}")
+            # connection_queue.put(result_packet, block=False)
+            result_packet = Packet(('127.0.0.1'), type=Type.IMG, category=Category.LOSE, command="")
             connection_queue.put(result_packet, block=False)
-            self.main_menu_callback()
+            self.showImage()
+            # self.main_menu_callback()
         else:
             self.current_row += 1
             self.current_col = 0

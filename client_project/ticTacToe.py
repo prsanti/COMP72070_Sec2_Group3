@@ -1,6 +1,8 @@
 import tkinter as tk
 from tkinter import ttk, messagebox
 from connection.packet import Packet, Type, Category
+from PIL import Image, ImageTk
+import io
 
 class TicTacToe(ttk.Frame):
     def __init__(self, parent, tcp_client, main_menu_callback):
@@ -19,6 +21,11 @@ class TicTacToe(ttk.Frame):
 
         title_label = ttk.Label(self, text="Tic Tac Toe", font=("Arial", 24, "bold"))
         title_label.pack(pady=10)
+
+        # Image label (created but hidden initially)
+        self.image_label = tk.Label(self)
+        self.image_label.pack(pady=10)
+        self.image_label.pack_forget()  # Hide initially
 
         self.create_widgets()
 
@@ -51,14 +58,22 @@ class TicTacToe(ttk.Frame):
             # Check for winner or tie
             if self.check_winner():
                 messagebox.showinfo("Game Over", "You win!")
-                win_packet: Packet = Packet((HOST, PORT), type=Type.GAME, category=Category.WIN, command="player wins tictactoe")
-                connection_queue.put(win_packet, block=False)
+                # win_packet: Packet = Packet((HOST, PORT), type=Type.GAME, category=Category.WIN, command="player wins tictactoe")
+                result_packet = Packet(('127.0.0.1', 59386), type=Type.IMG, category=Category.WIN, command="player wins tictactoe")
+                connection_queue.put(result_packet, block=False)
                 self.reset_game()
                 return
+            # check for loss
+            # elif not self.check_winner():
+            #     messagebox.showinfo("Game Over", "You Lose!")
+            #     # win_packet: Packet = Packet((HOST, PORT), type=Type.GAME, category=Category.WIN, command="player wins tictactoe")
+            #     result_packet = Packet(('127.0.0.1', 59386), type=Type.IMG, category=Category.LOSE, command="player wins tictactoe")
+            #     connection_queue.put(result_packet, block=False)
+            #     self.reset_game()
             elif "" not in self.board:
                 messagebox.showinfo("Game Over", "It's a tie!")
-                draw_packet: Packet = Packet(('127.0.0.1', 59386), type=Type.GAME, category=Category.DRAW, command="player ties in tictactoe")
-                connection_queue.put(draw_packet, block=False)
+                result_packet = Packet(('127.0.0.1', 59386), type=Type.IMG, category=Category.DRAW, command="player wins tictactoe")
+                connection_queue.put(result_packet, block=False)
                 self.reset_game()
                 return
 
@@ -70,6 +85,17 @@ class TicTacToe(ttk.Frame):
             cpu_move = client_queue.get()
             while cpu_move.category != Category.TICTACTOE:
                 cpu_move = client_queue.get()
+
+            # if cpu_move.type == Type.IMG:
+            #     try:
+            #         # Load and update image
+            #         image = Image.open(io.BytesIO(cpu_move.command))
+            #         image = image.resize((400, 400))
+            #         self.image_tk = ImageTk.PhotoImage(image)
+            #         self.image_label.configure(image=self.image_tk)
+            #         self.image_label.pack(pady=10)
+            #     except Exception as e:
+            #         print(f"Error displaying image: {e}")
 
             # Ensure the move is a valid index
             print(f"Received CPU move: {cpu_move.command}")
