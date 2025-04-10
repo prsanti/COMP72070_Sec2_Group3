@@ -20,6 +20,7 @@ import requests
 import random
 import queue
 from connection.queue import SingletonQueue
+import zlib
 # global queue variable
 connection_queue = SingletonQueue("connection_queue")
 
@@ -114,10 +115,46 @@ def serverON(server: TCP):
                     print("Chat received from client")
                 
                 # Send win image
-                # elif received_packet.type == Type.GAME and received_packet.category == Category.WIN:
-                #     win_image = ""  # Placeholder for the actual win image
-                #     win_packet: Packet = Packet(addr, Type.IMG, None, command=win_image)
-                #     server.send_packet(client_socket=client_socket, packet=win_packet)
+                elif received_packet.type == Type.IMG and received_packet.category == Category.WIN:
+                    print("Client won")
+                    image = "images/youWin.jpg"
+                    with open(image, "rb") as f:
+                        image_bytes = f.read()
+
+                    compressed_bytes = zlib.compress(image_bytes)
+
+                    # Create packet with image data
+                    image_packet = Packet(client="server", type=Type.IMG, category=Category.WIN, command=compressed_bytes)
+                    # win_packet: Packet = Packet(addr, Type.IMG, None, command=win_image)
+                    server.send_packet(client_socket=client_socket, packet=image_packet)
+
+                # Send lose image
+                elif received_packet.type == Type.IMG and received_packet.category == Category.LOSE:
+                    print("Client lost")
+                    image = "images/youLose.jpg"
+                    with open(image, "rb") as f:
+                        image_bytes = f.read()
+
+                    compressed_bytes = zlib.compress(image_bytes)
+
+                    # Create packet with image data
+                    image_packet = Packet(client="server", type=Type.IMG, category=Category.LOSE, command=compressed_bytes)
+                    # win_packet: Packet = Packet(addr, Type.IMG, None, command=win_image)
+                    server.send_packet(client_socket=client_socket, packet=image_packet)
+
+                # Send tie image
+                elif received_packet.type == Type.IMG and received_packet.category == Category.DRAW:
+                    print("Client tie")
+                    image = "images/youTie.jpg"
+                    with open(image, "rb") as f:
+                        image_bytes = f.read()
+
+                    compressed_bytes = zlib.compress(image_bytes)
+
+                    # Create packet with image data
+                    image_packet = Packet(client="server", type=Type.IMG, category=Category.DRAW, command=compressed_bytes)
+                    # win_packet: Packet = Packet(addr, Type.IMG, None, command=win_image)
+                    server.send_packet(client_socket=client_socket, packet=image_packet)
                 
 
 
