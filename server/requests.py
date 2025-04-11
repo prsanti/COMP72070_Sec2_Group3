@@ -65,6 +65,7 @@ def chat_request(received_packet: Packet):
     message: chatLogs.Message = chatLogs.Message(datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'), user=user, message=chat)
     chatLogs.insertMessage(message=message)
     
+    
 
         
 

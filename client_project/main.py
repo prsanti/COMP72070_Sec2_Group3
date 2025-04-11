@@ -13,10 +13,13 @@ from connection import Packet
 from connection.types import Type, Category
 import config
 
+from queue_1 import SingletonQueue
 HOST = "127.0.0.1"
 PORT = 27000
 BUFSIZE = 255
 
+connection_queue = SingletonQueue("connection_queue")
+client_queue = SingletonQueue("client_queue")
 
 from login import LoginPage
 from game_selection import GameSelection
@@ -82,7 +85,6 @@ class MainApplication(tk.Tk):
     def send_chat_message(self, event=None):
         message = self.chat_entry.get().strip()
         if message and self.tcp_client:
-            # Create chat packet
             chat_packet = Packet((HOST, PORT), type=Type.CHAT, category=Category.CHAT, command=f"{config.username} {message}")
             # add chat to ui
             parts = chat_packet.command.split(' ', 1)
@@ -148,7 +150,7 @@ class MainApplication(tk.Tk):
     def process_chat_packets(self):
         try:
             while True:
-                packet = config.client_queue.get_nowait()
+                packet = client_queue.get_nowait()
                 if packet.type == Type.CHAT:
                     self.display_chat_message(f"{packet.client}: {packet.command}")
         except queue.Empty:
@@ -167,12 +169,12 @@ def handle_socket_connection():
                 if buffer:
                     print(f"Received packet from server: {buffer.client}, Command: {buffer.command}")
                     # Put the received packet into the queue for the main thread to process
-                    config.client_queue.put(buffer, block=False)
+                    client_queue.put(buffer, block=False)
             except BlockingIOError:
                 pass  # No data available, move on
 
             try:
-                packet = config.connection_queue.get(timeout=1.0) 
+                packet = connection_queue.get(timeout=1.0) 
                 print(f"Dequeued packet: {packet}")
                 client.send_packet(s, packet=packet)
                 print(f"Packet sent.")
