@@ -5,6 +5,10 @@ from .users import createUserTable
 from .packets import createPacketTable, creatSentPacketTable
 from .chatLogs import createChatTable
 
+import unittest
+import os
+import sqlite3
+import pathlib
 
 dbPath = "serverData"
 
@@ -71,3 +75,46 @@ def dropAllTables(cursor):
 
     for table in listOfTables:
         dropTable(cursor, table)
+
+
+
+TEST_DB = "test_db.sqlite"
+
+class TestDBFunctions(unittest.TestCase):
+
+    def setUp(self):
+        global dbPath
+        dbPath = TEST_DB  # override dbPath
+        self.conn = sqlite3.connect(TEST_DB)
+        self.cursor = self.conn.cursor()
+
+    def tearDown(self):
+        self.conn.close()
+        if os.path.exists(TEST_DB):
+            os.remove(TEST_DB)
+
+    def test_verifyTableExists(self):
+        self.cursor.execute("CREATE TABLE test_table (id INTEGER)")
+        self.conn.commit()
+        self.assertTrue(verifyTableExists(self.cursor, "test_table"))
+        self.assertFalse(verifyTableExists(self.cursor, "nonexistent"))
+
+    def test_dropTable(self):
+        self.cursor.execute("CREATE TABLE temp (id INTEGER)")
+        self.conn.commit()
+        dropTable(self.cursor, "temp")
+        self.assertFalse(verifyTableExists(self.cursor, "temp"))
+
+    def test_dropAllTables(self):
+        for table in listOfTables:
+            self.cursor.execute(f"CREATE TABLE {table} (id INTEGER)")
+        self.conn.commit()
+        dropAllTables(self.cursor)
+        for table in listOfTables:
+            self.assertFalse(verifyTableExists(self.cursor, table))
+
+    def test_connectAndCreateCursor(self):
+        conn, cur = connectAndCreateCursor()
+        self.assertIsInstance(conn, sqlite3.Connection)
+        self.assertIsInstance(cur, sqlite3.Cursor)
+        conn.close()
