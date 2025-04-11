@@ -3,6 +3,9 @@ import argparse
 import unittest
 from connection.packet import TestPacket
 from connection.tcp import TestServer as TestTCP
+from game.rps import TestGetRPS
+from game.tictactoe import TestTicTacToeAI
+from database.database import TestDBFunctions
 
 # import utils for helper functions
 import utils
@@ -221,6 +224,9 @@ if __name__ == '__main__':
     suite = unittest.TestSuite()
     suite.addTests(unittest.TestLoader().loadTestsFromTestCase(TestPacket))
     suite.addTests(unittest.TestLoader().loadTestsFromTestCase(TestTCP))
+    suite.addTests(unittest.TestLoader().loadTestsFromTestCase(TestTicTacToeAI))
+    suite.addTests(unittest.TestLoader().loadTestsFromTestCase(TestGetRPS))
+    suite.addTests(unittest.TestLoader().loadTestsFromTestCase(TestDBFunctions))
     
     # Run tests
     print("Running all tests...")
