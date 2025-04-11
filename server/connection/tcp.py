@@ -9,83 +9,7 @@ import struct
 
 HOST = "127.0.0.1"
 PORT = 27000
-
-
-class TestServer(unittest.TestCase):
-    def setUp(self):
-        print("Running TCP Server Unit Tests")
-        # Create a test server instance
-        # arrage
-        self.server = TCP()
-
-    def test_start_server(self):
-        # assert
-        self.assertEqual(self.server.state, State.WAITINGFORCONNECTION)
-
-    # must connect client to server
-    def test_server_off(self):
-        # self.server.host
-        # act
-        self.server.close()
-        # check if clients list is empty
-        # assert
-        self.assertEqual(len(self.server.clients), 0)
-
-    def test_server_state_waiting(self):
-        # assert
-        self.assertEqual(self.server.state, State.WAITINGFORCONNECTION)
-
-    def test_server_state_waiting(self):
-        # assert
-        self.assertEqual(self.server.state, State.WAITINGFORCONNECTION)
-        
-    def test_server_state_waiting_command(self):
-        # assert
-        self.assertEqual(self.server.state, State.WAITINGFORCONNECTION)
-
-    def test_server_show_clients(self):
-        # act
-        # must connect a client to server for test to pass
-        # assert
-        self.assertEqual(len(self.server.clients), 1)
-        
-    # def test_server_bind(self):
-    #     # Test if server can bind to port
-    #     try:
-    #         #act
-    #         self.server.bind()
-    #         #assert
-    #         self.assertTrue(self.server.socket is not None)
-    #     except Exception as e:
-    #         self.fail(f"Server bind failed: {str(e)}")
-    #     finally:
-    #         self.server.socket.close()
-            
-    # def test_server_listen(self):
-    #     # Test if server can listen for connections
-    #     try:
-    #         self.server.bind()
-    #         self.server.listen()
-    #         self.assertTrue(self.server.socket is not None)
-    #     except Exception as e:
-    #         self.fail(f"Server listen failed: {str(e)}")
-    #     finally:
-    #         self.server.socket.close()
-            
-    # def test_server_accept_client(self):
-    #     # Test if server can accept client connections
-    #     try:
-    #         self.server.bind()
-    #         self.server.listen()
-    #         # Note: This test will timeout waiting for a client
-    #         # In a real test environment, you might want to mock the client connection
-    #         client_socket, addr = self.server.accept_client()
-    #         self.assertIsNone(client_socket)  # Should be None since no client connected
-    #     except Exception as e:
-    #         self.fail(f"Server accept failed: {str(e)}")
-    #     finally:
-    #         self.server.socket.close()
-
+    
 # run unit tests when main is called
 if __name__ == '__main__':
     unittest.main()
@@ -182,3 +106,52 @@ class TCP:
             client.close()
         self.server_socket.close()
         print("Server closed.")
+
+class TestServer(unittest.TestCase):
+    def setUp(self):
+        print("Running TCP Server Unit Tests")
+        # Create a test server instance
+        # arrage
+        self.server = TCP()
+
+    def test_start_server(self):
+        # assert
+        self.assertEqual(self.server.state, State.WAITINGFORCONNECTION)
+
+    # must connect client to server
+    def test_server_off(self):
+        # self.server.host
+        # act
+        self.server.close()
+        # check if clients list is empty
+        # assert
+        self.assertEqual(len(self.server.clients), 0)
+
+    def test_server_state_waiting(self):
+        # assert
+        self.assertEqual(self.server.state, State.WAITINGFORCONNECTION)
+
+    def test_server_state_waiting(self):
+        # assert
+        self.assertEqual(self.server.state, State.WAITINGFORCONNECTION)
+        
+    def test_server_state_waiting_command(self):
+        # assert
+        self.assertEqual(self.server.state, State.WAITINGFORCONNECTION)
+
+    def test_server_show_clients(self):
+        # act
+        # must connect a client to server for test to pass
+        # arrange
+        # assert
+        self.assertEqual(len(self.server.clients), 0)
+
+    def test_server_close(self):
+        # act
+        # close server
+        self.server.close()
+
+        # assert
+        # check if clients are empty
+        self.assertEqual(len(self.server.clients), 0)
+    
