@@ -4,7 +4,7 @@ from connection.packet import Packet, Type, Category
 from PIL import Image, ImageTk
 import io
 import time
-from config import client_queue,connection_queue
+
 class RockPaperScissors(ttk.Frame):
     def __init__(self, parent, tcp_client, main_menu_callback):
         super().__init__(parent)
@@ -69,6 +69,7 @@ class RockPaperScissors(ttk.Frame):
         self.back_btn.pack(pady=20)
 
     def make_move(self, move):
+        from main import client_queue,connection_queue
 
         # Send the player's move to the server
         move_packet = Packet(('127.0.0.1', 59386), type=Type.GAME, category=Category.RPS, command=move)

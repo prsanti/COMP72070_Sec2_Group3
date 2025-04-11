@@ -31,7 +31,7 @@ class WordleGame(ttk.Frame):
 
     def get_word_from_server(self):
         
-        from config import client_queue
+        from main import client_queue
         while True:
             word_packet: Packet = client_queue.get()
             if word_packet.type == Type.STATE and word_packet.category == Category.WORDLE:
@@ -88,7 +88,7 @@ class WordleGame(ttk.Frame):
             lbl.config(text="")
 
     def check_guess(self):
-        from config import connection_queue
+        from main import connection_queue
         """Check the current guess and update the grid."""
         if self.current_col != 5:
             messagebox.showerror("Invalid Input", "Please enter a 5-letter word")
@@ -126,7 +126,7 @@ class WordleGame(ttk.Frame):
             self.current_col = 0
 
     def get_image(self):
-        from config import client_queue
+        from main import client_queue
         time.sleep(1)
         img_packet:Packet = client_queue.get()
 

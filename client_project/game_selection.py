@@ -6,6 +6,7 @@ from coinFlip import CoinFlip
 from rps import RockPaperScissors
 from connection.packet import Packet, Type, Category
 
+
 class GameSelection(tk.Frame):
     def __init__(self, parent, tcp_client):
         super().__init__(parent)
@@ -48,7 +49,7 @@ class GameSelection(tk.Frame):
         self.current_game.pack(expand=True, fill="both")
     
     def send_game_packet(self, games: str):
-        from config import connection_queue
+        from main import connection_queue
         category: Category = None
         if games == "TicTacToe":  
             category = Category.TICTACTOE
