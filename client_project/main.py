@@ -4,7 +4,8 @@ from connection.tcp import TCP
 import threading
 import time
 import queue
-
+from login import LoginPage
+from game_selection import GameSelection
 from ticTacToe import TicTacToe
 from coinFlip import CoinFlip
 from wordleGame import WordleGame
@@ -21,8 +22,7 @@ BUFSIZE = 255
 connection_queue = SingletonQueue("connection_queue")
 client_queue = SingletonQueue("client_queue")
 
-from login import LoginPage
-from game_selection import GameSelection
+
 
 
 class MainApplication(tk.Tk):
