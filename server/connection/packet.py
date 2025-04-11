@@ -2,6 +2,29 @@ import pickle
 import unittest
 from .types import Type, Category
 
+if __name__ == '__main__':
+    unittest.main()
+
+class Packet:
+  def __init__(self, client="", type=None, category=None, command=""):
+    print("Packet constructor")
+    self.client = client
+    self.type: Type = type
+    self.category: Category = category
+    self.command = command
+    
+
+  # package packet into bytes
+  def serialize(self) -> bytes:
+      return pickle.dumps(self)
+  
+  # load packet to read
+  @staticmethod
+  def deserialize(data: bytes):
+      return pickle.loads(data)
+  
+  def getPacketType(self):
+     return self.type
 class TestPacket(unittest.TestCase):
     def setUp(self):
         print("Running Packet Unit Tests")
@@ -45,29 +68,43 @@ class TestPacket(unittest.TestCase):
         self.assertEqual(deserialized.command, self.test_packet.command)
         print("test_serialize_deserialize pass")
 
-    # def test_get_packet_type(self):
-    #     self.assertEqual(self.test_packet.getPacketType(), Type.REQUEST)
+    def test_get_packet_type_state(self):
+        # test get type of state
+        self.assertEqual(self.test_packet.getPacketType(), Type.STATE)
 
-if __name__ == '__main__':
-    unittest.main()
+    def test_get_packet_type_game(self):
+        # arrange
+        self.test_packet.type = Type.GAME
+        # assert
+        self.assertEqual(self.test_packet.getPacketType(), Type.GAME)
 
-class Packet:
-  def __init__(self, client="", type=None, category=None, command=""):
-    print("Packet constructor")
-    self.client = client
-    self.type: Type = type
-    self.category: Category = category
-    self.command = command
+    def test_get_packet_type_login(self):
+        # arrange
+        self.test_packet.type = Type.LOGIN
+        # assert
+        self.assertEqual(self.test_packet.getPacketType(), Type.LOGIN)
+
+    def test_get_packet_type_register(self):
+        # arrange
+        self.test_packet.type = Type.REGISTER
+        # assert
+        self.assertEqual(self.test_packet.getPacketType(), Type.REGISTER)
     
+    def test_get_packet_type_chat(self):
+        # arrange
+        self.test_packet.type = Type.CHAT
+        # assert
+        self.assertEqual(self.test_packet.getPacketType(), Type.CHAT)
 
-  # package packet into bytes
-  def serialize(self) -> bytes:
-      return pickle.dumps(self)
-  
-  # load packet to read
-  @staticmethod
-  def deserialize(data: bytes):
-      return pickle.loads(data)
-  
-  def getPacketType(self):
-     return self.type
+    def test_get_packet_type_admin(self):
+        # arrange
+        self.test_packet.type = Type.ADMIN
+        # assert
+        self.assertEqual(self.test_packet.getPacketType(), Type.ADMIN)
+
+    def test_get_packet_type_img(self):
+        # arrange
+        self.test_packet.type = Type.IMG
+        # assert
+        self.assertEqual(self.test_packet.getPacketType(), Type.IMG)
+
