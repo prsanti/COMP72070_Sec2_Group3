@@ -58,7 +58,7 @@ class MainApplication(tk.Tk):
 
         self.chat_display = tk.Text(
             self.chat_frame,
-            height=7,
+            height=3,
             width=40,
             state="disabled",
             wrap="word",
