@@ -48,8 +48,7 @@ class TicTacToe(ttk.Frame):
         back_btn.pack(pady=20)
 
     def make_move(self, idx):
-        from main import connection_queue
-        from main import client_queue
+        from main import client_queue,connection_queue
         from main import HOST, PORT
         
         # Ensure the player can only make a move if it's their turn

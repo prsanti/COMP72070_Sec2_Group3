@@ -47,7 +47,25 @@ def getAllMessages(cursor: sqlite3.Cursor):
 
 
 def getRecentMessages(cursor: sqlite3.Cursor):
-    # Fetch only the messages that are considered "new" after server started
     select_message = """SELECT date, user, message FROM messages WHERE date > ?"""
     cursor.execute(select_message, (server_start_time,))
     return cursor.fetchall()
+
+def getMessagesRange(offset, limit, cursor):
+
+    query = """
+    SELECT date, user, message
+    FROM messages
+    WHERE date > ?
+    ORDER BY date DESC
+    LIMIT ? OFFSET ?
+    """
+    cursor.execute(query, (server_start_time, limit, offset))
+    return cursor.fetchall()
+
+def load_chat_logs(offset=0, limit=100):
+    from database.database import connectAndCreateCursor
+    connection, cursor = connectAndCreateCursor()
+    logs = getMessagesRange(offset, limit, cursor)
+    connection.close()
+    return logs

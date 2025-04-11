@@ -3,6 +3,7 @@ from tkinter import ttk, messagebox
 from connection.packet import Packet, Type, Category
 from PIL import Image, ImageTk
 import io
+import time
 
 class RockPaperScissors(ttk.Frame):
     def __init__(self, parent, tcp_client, main_menu_callback):
@@ -68,7 +69,7 @@ class RockPaperScissors(ttk.Frame):
         self.back_btn.pack(pady=20)
 
     def make_move(self, move):
-        from main import connection_queue, client_queue
+        from main import client_queue,connection_queue
 
         # Send the player's move to the server
         move_packet = Packet(('127.0.0.1', 59386), type=Type.GAME, category=Category.RPS, command=move)
@@ -76,6 +77,7 @@ class RockPaperScissors(ttk.Frame):
 
         # Wait for the server's response
         while True:
+            time.sleep(1)
             response = client_queue.get()
 
             if response.type == Type.GAME and response.category == Category.RPS:

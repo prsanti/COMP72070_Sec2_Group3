@@ -7,6 +7,10 @@ from chat import chat
 from database.chatLogs import Message
 import datetime
 
+CHAT_LOGS_CHUNK_SIZE = 100
+MAX_CHAT_MESSAGES = 5 
+last_loaded_chat_log_index = 0 
+
 # hard coded data for visuals
 connected_clients = ["Client"]
 chat_logs = []  # All chat history (from the database)
@@ -39,6 +43,8 @@ def get_updated_data():
     sent_packet_list[:] = packets.getAllSentPackets(cursor=cursor)
     conn.close()
 
+    current_chat_logs[:] = current_chat_logs[-MAX_CHAT_MESSAGES:]
+
     update_chat_display()
     update_database_info_display()
     update_packet_display()
@@ -59,12 +65,13 @@ def update_chat_display():
             ui.label(message)
 
     # Update only recent chat logs
-    current_chat_log_container.clear()
-    with current_chat_log_container:
-        for date, user, message in current_chat_logs:
-            ui.label(date)
-            ui.label(user)
-            ui.label(message)
+    if current_chat_logs:
+        current_chat_log_container.clear()
+        with current_chat_log_container:
+            for date, user, message in current_chat_logs:
+                ui.label(date)
+                ui.label(user)
+                ui.label(message)
 
 
 def update_database_info_display():
@@ -113,13 +120,13 @@ def send_message(value):
 
     message: Message = Message(datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'), "server", value)
     chatLogs.insertMessage(message=message)
+    
 
     get_updated_data()
 
 def disconnect_user():
-    print("Disconnect user triggered") 
     from main import connection_queue
-    disconnect_packet: Packet = Packet(client="1", type=Type.STATE, category=Category.STATE, command="disconnect")
+    disconnect_packet: Packet = Packet(client="", type=Type.STATE, category=Category.STATE, command="")
     connection_queue.put(disconnect_packet)
 
 # Load initial data when the app starts
@@ -192,7 +199,7 @@ with ui.row().style("width: 100%; height: 100%; gap: 20px;"):
             
             with ui.row():
                 ui.label("client")
-                ui.button("Disconnect", on_click=disconnect_user)
+                ui.button("Disconnect")
 
         # Database Info Card
         with ui.card().style("width: 100%;"):
@@ -224,21 +231,6 @@ with ui.row().style("width: 100%; height: 100%; gap: 20px;"):
 
     with ui.column().style("flex: 1;"):
         with ui.card().style("width: 100%;"):
-            ui.label("All Chat History").style("font-weight: bold; font-size: 18px; margin-bottom: 10px;")
-
-            # Grid header for packets
-            with ui.grid(columns=3).style("font-weight: bold; width: 100%;"):
-                ui.label("Date/Time")
-                ui.label("User")
-                ui.label("Message")
-            with ui.scroll_area().classes('w-100 h-40 border'):
-                chat_display = ui.grid(columns=3).classes('w-full')
-                
-
-            message_input = ui.input(placeholder="Send message to all users:").props('clearable')
-            ui.button("Send", on_click=lambda: send_message(message_input.value))
-
-        with ui.card().style("width: 100%;"):
             ui.label("Current Chat Logs").style("font-weight: bold; font-size: 18px; margin-bottom: 10px;")
 
             # Grid header for packets
@@ -248,6 +240,21 @@ with ui.row().style("width: 100%; height: 100%; gap: 20px;"):
                 ui.label("Message")
             with ui.scroll_area().classes('w-100 h-40 border'):
                 current_chat_log_container = ui.grid(columns=3).classes('w-full')
+                
+
+            message_input = ui.input(placeholder="Send message to all users:").props('clearable')
+            ui.button("Send", on_click=lambda: send_message(message_input.value))
+
+        with ui.card().style("width: 100%;"):
+            ui.label("All Chat History").style("font-weight: bold; font-size: 18px; margin-bottom: 10px;")
+
+            # Grid header for packets
+            with ui.grid(columns=3).style("font-weight: bold; width: 100%;"):
+                ui.label("Date/Time")
+                ui.label("User")
+                ui.label("Message")
+            with ui.scroll_area().classes('w-100 h-40 border'):
+                chat_display = ui.grid(columns=3).classes('w-full')
                 update_chat_display()
             
 

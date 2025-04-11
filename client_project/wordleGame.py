@@ -84,6 +84,7 @@ class WordleGame(ttk.Frame):
     def check_guess(self):
         from main import connection_queue, PORT
 
+
         if self.current_col != 5:
             messagebox.showerror("Invalid Input", "Please enter a 5-letter word")
             return
