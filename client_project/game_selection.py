@@ -48,7 +48,7 @@ class GameSelection(tk.Frame):
         self.current_game.pack(expand=True, fill="both")
     
     def send_game_packet(self, games: str):
-        from main import connection_queue
+        from config import connection_queue
         category: Category = None
         if games == "TicTacToe":  
             category = Category.TICTACTOE
@@ -59,7 +59,7 @@ class GameSelection(tk.Frame):
         elif games == "CoinFlip": 
             category = Category.FLIP
 
-        game_packet: Packet = Packet(('127.0.0.1', 59386), type=Type.STATE, category=category, command=f"player playing {category}")
+        game_packet: Packet = Packet(client=self.tcp_client, type=Type.STATE, category=category, command=f"player playing {category}")
         connection_queue.put(game_packet)
 
     def show_game_selection(self):

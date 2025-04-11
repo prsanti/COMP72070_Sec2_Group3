@@ -30,8 +30,8 @@ class LoginPage(tk.Frame):
         self.offline_button.pack(pady=10)
 
     def login(self):
-        from main import connection_queue
-        from main import client_queue
+        from config import connection_queue
+        from config import client_queue
         import config
 
 
