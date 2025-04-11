@@ -48,8 +48,8 @@ class TicTacToe(ttk.Frame):
         back_btn.pack(pady=20)
 
     def make_move(self, idx):
-        from main import connection_queue
-        from main import client_queue
+        from config import connection_queue
+        from config import client_queue
         from main import HOST, PORT
         
         # Ensure the player can only make a move if it's their turn
@@ -94,7 +94,7 @@ class TicTacToe(ttk.Frame):
 
 
     def computer_move(self, cpu_move: str):
-        from main import connection_queue
+        from config import connection_queue
         move = int(cpu_move)
         print(f"[Client] Applying CPU move at index {move}")
 
@@ -175,7 +175,7 @@ class TicTacToe(ttk.Frame):
             button.config(text="", style="Grid.TButton")
 
     def get_image(self):
-        from main import client_queue
+        from config import client_queue
         img_packet:Packet = client_queue.get()
 
         if img_packet.type == Type.IMG:
