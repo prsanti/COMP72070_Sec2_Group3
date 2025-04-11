@@ -4,7 +4,6 @@ from connection.tcp import TCP
 import threading
 import time
 import queue
-from queue_1 import SingletonQueue
 
 from ticTacToe import TicTacToe
 from coinFlip import CoinFlip
@@ -14,9 +13,11 @@ from connection import Packet
 from connection.types import Type, Category
 import config
 
+from queue_1 import SingletonQueue
 HOST = "127.0.0.1"
 PORT = 27000
 BUFSIZE = 255
+
 connection_queue = SingletonQueue("connection_queue")
 client_queue = SingletonQueue("client_queue")
 
@@ -84,10 +85,12 @@ class MainApplication(tk.Tk):
 
     def send_chat_message(self, event=None):
         message = self.chat_entry.get().strip()
+
         if message and hasattr(self, 'tcp_client') and self.tcp_client:
             chat_packet = Packet((HOST, PORT), type=Type.CHAT, category=Category.CHAT, command=f"{config.username}: {message}")
 
             self.display_chat_message(f"You: {message}")
+
             connection_queue.put(chat_packet)
             self.chat_entry.delete(0, tk.END)
 

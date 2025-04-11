@@ -1,4 +1,4 @@
-import queue
+from queue_1 import SingletonQueue
 
 # Server configuration
 HOST = 'localhost'

@@ -6,7 +6,9 @@ from coinFlip import CoinFlip
 from rps import RockPaperScissors
 from connection.packet import Packet, Type, Category
 
+
 class GameSelection(tb.Frame):
+
     def __init__(self, parent, tcp_client):
         super().__init__(parent, bootstyle="light")  # Use a light theme
         self.parent = parent
@@ -73,7 +75,7 @@ class GameSelection(tb.Frame):
         elif games == "CoinFlip":
             category = Category.FLIP
 
-        game_packet: Packet = Packet(('127.0.0.1', 59386), type=Type.STATE, category=category, command=f"player playing {category}")
+        game_packet: Packet = Packet(client=self.tcp_client, type=Type.STATE, category=category, command=f"player playing {category}")
         connection_queue.put(game_packet)
 
     def show_game_selection(self):
