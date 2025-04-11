@@ -12,6 +12,7 @@ from wordleGame import WordleGame
 import socket
 from connection import Packet
 from connection.types import Type, Category
+import config
 
 HOST = "127.0.0.1"
 PORT = 27000
@@ -21,6 +22,7 @@ client_queue = SingletonQueue("client_queue")
 
 from login import LoginPage
 from game_selection import GameSelection
+
 
 class MainApplication(tk.Tk):
     def __init__(self):
@@ -56,7 +58,7 @@ class MainApplication(tk.Tk):
         # Chat message display
         self.chat_display = tk.Text(
             self.chat_frame,
-            height=10,
+            height=5,
             state="disabled",
             wrap="word",
             bg="#FFFFFF",
@@ -83,7 +85,7 @@ class MainApplication(tk.Tk):
         message = self.chat_entry.get().strip()
         if message and self.tcp_client:
             # Create chat packet
-            chat_packet = Packet((HOST, PORT), type=Type.CHAT, category=Category.CHAT, command=message)
+            chat_packet = Packet((HOST, PORT), type=Type.CHAT, category=Category.CHAT, command=f"{config.username} {message}")
             # add chat to ui
             self.display_chat_message(f"Client: {chat_packet.command}")
             # add packet to queue
@@ -94,13 +96,14 @@ class MainApplication(tk.Tk):
         self.chat_frame.pack_forget()  # Hide chat on login screen
         self.login_page = LoginPage(self, self.on_login_success)
         self.login_page.pack(expand=True, fill="both")
+        # self.chat_frame.pack_forget()
 
     def on_login_success(self, tcp_client):
         self.tcp_client = tcp_client
         self.login_page.pack_forget()
 
         # enable chat window
-        self.chat_frame.pack(side="bottom", fill="x", padx=10, pady=10)
+        self.chat_frame.pack(side="bottom", fill="x", padx=10, pady=0)
 
         self.game_selection = GameSelection(self, tcp_client)
         self.game_selection.pack(expand=True, fill="both")

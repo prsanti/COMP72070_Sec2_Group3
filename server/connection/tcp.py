@@ -5,6 +5,7 @@ from .packet import Packet
 from .types import State
 from database import packets
 import select
+import struct
 
 HOST = "127.0.0.1"
 PORT = 27000
@@ -129,15 +130,19 @@ class TCP:
             return None, None
 
     def send_packet(self, client_socket, packet):
-        """Send a Packet object to the connected client."""
+        from .types import Type
+        """Send a Packet object to the connected client with a length header."""
         try:
             serialized_packet = packet.serialize()
-            client_socket.sendall(serialized_packet)
-            print(f"Sent Packet: {packet.__dict__}")
-            packets.addSentPacketToTable(packet=packet)
+            length_header = struct.pack('!I', len(serialized_packet))  # 4-byte length header
+            client_socket.sendall(length_header + serialized_packet)
+            if packet.type is not Type.IMG:
+                packets.addSentPacketToTable(packet=packet)
+                print(f"Sent Packet: {packet.__dict__}")
 
         except socket.error as e:
             print(f"Error sending packet: {e}")
+
 
     def receive_packet(self, client_socket):
         """Receive a Packet object from the client."""
